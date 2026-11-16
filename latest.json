@@ -1,6 +1,6 @@
 {
-  "versionCode": 14,
-  "name": "1.9",
+  "versionCode": 15,
+  "name": "2.0",
   "apk": "SpanishTranslator.apk",
-  "notes": "Scan & translate: scan pages with the camera or open a PDF, photo, Word or text file. The translation is written in place, so tables, logos, stamps and Word styles stay the same. Save or share as PDF/.docx."
+  "notes": "New 3D design: raised 3D cards and buttons with light and shadow, buttons that press down, cards that tilt toward your finger, lists that flip in, a 3D microphone and a perspective background. All features stay the same."
 }
