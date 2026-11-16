@@ -1,6 +1,6 @@
 {
-  "versionCode": 12,
-  "name": "1.7",
+  "versionCode": 13,
+  "name": "1.8",
   "apk": "SpanishTranslator.apk",
-  "notes": "Made for the ±600 kV HVDC line: 19 new HVDC words (poles, bipole, electrode line, converter station parts, creepage, corona), 3D model of the whole HVDC system, + and − poles on the tower, translation tuned for DC."
+  "notes": "New Materials tab: 73 foundation materials, tools, machines and services with specifications, 3D/drawing and photo; tap one to open it in the dictionary. Vendors with call, e-mail and website buttons (editable). Import your NFA and vendor lists (CSV) with the 📥 button; they stay private on the phone."
 }
