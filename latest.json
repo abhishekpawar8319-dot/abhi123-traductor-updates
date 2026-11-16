@@ -1,6 +1,6 @@
 {
-  "versionCode": 10,
-  "name": "1.5.4",
+  "versionCode": 11,
+  "name": "1.6",
   "apk": "SpanishTranslator.apk",
-  "notes": "Tower checklist T2225–T2690, 24/7 listening, English speech fallback, microphone fix, and updates inside the app."
+  "notes": "3D models of technical words, photo and definition from Wikipedia, every technical word recorded and linked to towers and earlier records, new Graphite & Copper design."
 }
