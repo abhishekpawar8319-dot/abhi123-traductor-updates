@@ -1,6 +1,6 @@
 {
-  "versionCode": 11,
-  "name": "1.6",
+  "versionCode": 12,
+  "name": "1.7",
   "apk": "SpanishTranslator.apk",
-  "notes": "3D models of technical words, photo and definition from Wikipedia, every technical word recorded and linked to towers and earlier records, new Graphite & Copper design."
+  "notes": "Made for the ±600 kV HVDC line: 19 new HVDC words (poles, bipole, electrode line, converter station parts, creepage, corona), 3D model of the whole HVDC system, + and − poles on the tower, translation tuned for DC."
 }
