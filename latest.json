@@ -1,6 +1,1 @@
-{
-  "versionCode": 17,
-  "name": "2.2",
-  "apk": "SpanishTranslator.apk",
-  "notes": "Speaker names: every line shows who said it. Set names yourself, or let the app pick them up automatically (\"soy Juan\", \"Pedro, ¿puedes…?\"). ✨ Identify speakers lets Claude name the speakers of the whole conversation."
-}
+{"versionCode": 18, "name": "2.2.1", "apk": "SpanishTranslator.apk", "notes": "Updates now work with no setup: the update source is built in. A wrong value in Settings is ignored, and a pasted GitHub link works too."}
