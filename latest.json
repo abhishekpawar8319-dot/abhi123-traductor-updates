@@ -1,6 +1,6 @@
 {
-  "versionCode": 16,
-  "name": "2.1",
+  "versionCode": 17,
+  "name": "2.2",
   "apk": "SpanishTranslator.apk",
-  "notes": "Wolf colours: charcoal and slate greys, silver-white text and amber wolf-eye accents, with icy blue for Reply mode. Same 3D look and features."
+  "notes": "Speaker names: every line shows who said it. Set names yourself, or let the app pick them up automatically (\"soy Juan\", \"Pedro, ¿puedes…?\"). ✨ Identify speakers lets Claude name the speakers of the whole conversation."
 }
