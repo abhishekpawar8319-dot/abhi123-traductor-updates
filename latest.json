@@ -1,1 +1,1 @@
-{"versionCode": 18, "name": "2.2.1", "apk": "SpanishTranslator.apk", "notes": "Updates now work with no setup: the update source is built in. A wrong value in Settings is ignored, and a pasted GitHub link works too."}
+{"versionCode": 19, "name": "2.3", "apk": "SpanishTranslator.apk", "notes": "Google Drive backup: menu ⋮ › Backup & My files. Connect Drive once and every change is backed up automatically. Add photos, videos and documents to My files. Restore on a new phone."}
