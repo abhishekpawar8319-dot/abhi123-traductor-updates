@@ -23,9 +23,10 @@
         <Button android:id="@+id/modeEn" style="@style/Chip" android:text="@string/mode_en" />
     </LinearLayout>
 
-    <androidx.appcompat.widget.SwitchCompat android:id="@+id/speak"
-        android:layout_width="match_parent" android:layout_height="48dp"
-        android:text="@string/speak_aloud" android:textColor="@color/text" />
+    <Button android:id="@+id/speaker" android:layout_width="match_parent" android:layout_height="52dp"
+        android:layout_marginTop="6dp" android:background="@drawable/speaker_bg"
+        android:textAllCaps="false" android:textColor="@color/text" android:textSize="17sp"
+        android:textStyle="bold" android:text="@string/speaker_on" />
 
     <TextView android:id="@+id/partial" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:minHeight="24dp" android:textColor="@color/muted" android:textStyle="italic" android:textSize="16sp" />

@@ -8,6 +8,11 @@
     <string name="mode_es">Español → EN</string>
     <string name="mode_en">English → ES</string>
     <string name="speak_aloud">Speak translations aloud</string>
+    <string name="speaker_on">🔊  Speaker ON – translations are read aloud</string>
+    <string name="speaker_off">🔇  Speaker OFF – tap to read translations aloud</string>
+    <string name="speaker_turn_on">🔊 Speaker on</string>
+    <string name="speaker_turn_off">🔇 Speaker off</string>
+    <string name="play">Read this translation aloud</string>
     <string name="history">Saved translations</string>
     <string name="battery">Allow 24/7</string>
     <string name="not_translated">(not translated – language pack not ready)</string>

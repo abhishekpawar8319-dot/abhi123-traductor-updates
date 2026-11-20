@@ -30,7 +30,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -50,11 +49,13 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
     private val items = ArrayList<TranslationRecord>()
     private val time = SimpleDateFormat("HH:mm", Locale.getDefault())
     var onLongPress: ((TranslationRecord) -> Unit)? = null
+    var onPlay: ((TranslationRecord) -> Unit)? = null
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
         val tag: TextView = v.findViewById(R.id.tag)
         val original: TextView = v.findViewById(R.id.original)
         val translated: TextView = v.findViewById(R.id.translated)
+        val play: Button = v.findViewById(R.id.play)
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -76,10 +77,19 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
         h.original.text = r.original
         h.translated.text = r.translated.ifBlank { h.itemView.context.getString(R.string.not_translated) }
         h.itemView.setOnLongClickListener { onLongPress?.invoke(r); onLongPress != null }
+        h.play.visibility = if (r.translated.isBlank()) View.INVISIBLE else View.VISIBLE
+        h.play.setOnClickListener { onPlay?.invoke(r) }
     }
 }
 
 private val io = Executors.newSingleThreadExecutor()
+
+/** Plays one translation: through the service if it is listening (so it pauses the mic), else directly. */
+internal fun playTranslation(activity: AppCompatActivity, speaker: Lazy<Speaker>, r: TranslationRecord) {
+    if (r.translated.isBlank()) return
+    if (TranslatorService.running) TranslatorService.say(activity, r.translated, r.target)
+    else speaker.value.say(r.translated, r.target)
+}
 
 class MainActivity : AppCompatActivity() {
     private lateinit var prefs: Prefs
@@ -88,11 +98,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var partial: TextView
     private val adapter = TranslationAdapter()
     private lateinit var modeButtons: Map<ListenMode, Button>
+    private lateinit var speakerButton: Button
+    private val speaker = lazy { Speaker(this) }
 
     private val busListener: (LiveBus.Event) -> Unit = { e ->
         when (e) {
             is LiveBus.Event.Status -> showStatus(e)
             is LiveBus.Event.Partial -> partial.text = e.text
+            is LiveBus.Event.Speaker -> showSpeaker()
             is LiveBus.Event.Translated -> {
                 adapter.addTop(e.record)
                 findViewById<RecyclerView>(R.id.list).scrollToPosition(0)
@@ -123,10 +136,13 @@ class MainActivity : AppCompatActivity() {
                 TranslatorService.settingsChanged(this)
             }
         }
-        findViewById<SwitchCompat>(R.id.speak).apply {
-            isChecked = prefs.speakAloud
-            setOnCheckedChangeListener { _, on -> prefs.speakAloud = on }
+        speakerButton = findViewById(R.id.speaker)
+        speakerButton.setOnClickListener {
+            TranslatorService.setSpeaker(this, !prefs.speakAloud)
+            showSpeaker()
         }
+        adapter.onPlay = { r -> playTranslation(this, speaker, r) }
+        showSpeaker()
         toggle.setOnClickListener {
             if (TranslatorService.running) TranslatorService.stop(this) else startWithPermissions()
         }
@@ -145,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         LiveBus.add(busListener)
         showStatus(LiveBus.lastStatus.copy(running = TranslatorService.running))
+        showSpeaker() // may have been changed from the notification
         io.execute {
             val list = HistoryDb.get(this).recent(100)
             runOnUiThread { adapter.setAll(list) }
@@ -155,6 +172,17 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         LiveBus.remove(busListener)
         super.onStop()
+    }
+
+    override fun onDestroy() {
+        if (speaker.isInitialized()) speaker.value.shutdown()
+        super.onDestroy()
+    }
+
+    private fun showSpeaker() {
+        val on = prefs.speakAloud
+        speakerButton.isActivated = on
+        speakerButton.text = getString(if (on) R.string.speaker_on else R.string.speaker_off)
     }
 
     private fun showStatus(s: LiveBus.Event.Status) {
@@ -210,6 +238,7 @@ class HistoryActivity : AppCompatActivity() {
     private lateinit var db: HistoryDb
     private lateinit var info: TextView
     private var query = ""
+    private val speaker = lazy { Speaker(this) }
     private val retentionChoices = intArrayOf(30, 90, 180, 365, 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -221,6 +250,7 @@ class HistoryActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@HistoryActivity)
             adapter = this@HistoryActivity.adapter
         }
+        adapter.onPlay = { r -> playTranslation(this, speaker, r) }
         adapter.onLongPress = { r ->
             AlertDialog.Builder(this).setMessage(R.string.delete_one)
                 .setPositiveButton(R.string.delete) { _, _ -> io.execute { db.delete(r.id); reload() } }
@@ -257,6 +287,11 @@ class HistoryActivity : AppCompatActivity() {
                 .setNegativeButton(android.R.string.cancel, null).show()
         }
         reload()
+    }
+
+    override fun onDestroy() {
+        if (speaker.isInitialized()) speaker.value.shutdown()
+        super.onDestroy()
     }
 
     private fun reload() {

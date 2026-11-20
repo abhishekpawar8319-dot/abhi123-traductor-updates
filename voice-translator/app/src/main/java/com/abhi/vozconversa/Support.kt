@@ -3,6 +3,7 @@ package com.abhi.vozconversa
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.speech.tts.TextToSpeech
 import com.abhi.vozconversa.core.Lang
 import com.abhi.vozconversa.core.ListenMode
 import com.abhi.vozconversa.core.TextTranslator
@@ -41,6 +42,7 @@ object LiveBus {
         data class Status(val running: Boolean, val text: String) : Event()
         data class Partial(val text: String) : Event()
         data class Translated(val record: TranslationRecord) : Event()
+        data class Speaker(val on: Boolean) : Event()
     }
 
     private val main = Handler(Looper.getMainLooper())
@@ -84,5 +86,31 @@ class MlKitTranslator : TextTranslator {
     fun close() {
         esEn.close()
         enEs.close()
+    }
+}
+
+/** Reads a single translation aloud when the listening service is not running. */
+class Speaker(context: Context) {
+    private var tts: TextToSpeech? = null
+    private var ready = false
+    private var queued: Pair<String, Lang>? = null
+
+    init {
+        tts = TextToSpeech(context.applicationContext) { status ->
+            ready = status == TextToSpeech.SUCCESS
+            queued?.let { (t, l) -> queued = null; say(t, l) }
+        }
+    }
+
+    fun say(text: String, lang: Lang) {
+        val t = tts ?: return
+        if (!ready) { queued = text to lang; return }
+        t.language = java.util.Locale.forLanguageTag(lang.locale)
+        t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "replay")
+    }
+
+    fun shutdown() {
+        runCatching { tts?.stop(); tts?.shutdown() }
+        tts = null
     }
 }

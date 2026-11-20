@@ -52,6 +52,10 @@ class TranslatorService : Service() {
         const val ACTION_START = "com.abhi.vozconversa.START"
         const val ACTION_STOP = "com.abhi.vozconversa.STOP"
         const val ACTION_SETTINGS_CHANGED = "com.abhi.vozconversa.SETTINGS"
+        const val ACTION_SPEAKER = "com.abhi.vozconversa.SPEAKER"
+        const val ACTION_SAY = "com.abhi.vozconversa.SAY"
+        const val EXTRA_TEXT = "text"
+        const val EXTRA_LANG = "lang"
         private const val CHANNEL = "voz_running"
         private const val NOTIF_ID = 42
         private const val WATCHDOG_MS = 10_000L
@@ -65,6 +69,20 @@ class TranslatorService : Service() {
 
         fun stop(ctx: Context) {
             ctx.startService(Intent(ctx, TranslatorService::class.java).setAction(ACTION_STOP))
+        }
+
+        /** Speaker on/off while running (also from the notification). */
+        fun setSpeaker(ctx: Context, on: Boolean) {
+            Prefs(ctx).speakAloud = on
+            if (running) ctx.startService(Intent(ctx, TranslatorService::class.java).setAction(ACTION_SPEAKER).putExtra("on", on))
+        }
+
+        /** Reads one translation aloud while the service is listening (pausing the microphone). */
+        fun say(ctx: Context, text: String, lang: Lang) {
+            ctx.startService(
+                Intent(ctx, TranslatorService::class.java).setAction(ACTION_SAY)
+                    .putExtra(EXTRA_TEXT, text).putExtra(EXTRA_LANG, lang.name)
+            )
         }
 
         fun settingsChanged(ctx: Context) {
@@ -113,6 +131,21 @@ class TranslatorService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP -> { shutdown(); return START_NOT_STICKY }
+            ACTION_SPEAKER -> {
+                if (running) {
+                    val on = if (intent.hasExtra("on")) intent.getBooleanExtra("on", true) else !prefs.speakAloud
+                    applySpeaker(on)
+                }
+                return START_STICKY
+            }
+            ACTION_SAY -> {
+                if (running) {
+                    val text = intent.getStringExtra(EXTRA_TEXT).orEmpty()
+                    val lang = runCatching { Lang.valueOf(intent.getStringExtra(EXTRA_LANG)!!) }.getOrDefault(Lang.EN)
+                    if (text.isNotBlank()) speak(text, lang, "say-${SystemClock.elapsedRealtime()}")
+                }
+                return START_STICKY
+            }
             ACTION_SETTINGS_CHANGED -> {
                 if (running) { cancelRecognizer(); scheduleListen(150) }
                 return START_STICKY
@@ -332,18 +365,32 @@ class TranslatorService : Service() {
         lastLine = record.translated.ifBlank { record.original }
         LiveBus.post(LiveBus.Event.Translated(record))
         updateNotification()
-        if (prefs.speakAloud && ttsReady && record.translated.isNotBlank()) speak(record)
+        if (prefs.speakAloud && record.translated.isNotBlank()) speak(record.translated, record.target, "utt-${record.id}")
     }
 
-    private fun speak(record: TranslationRecord) {
+    private fun applySpeaker(on: Boolean) {
+        prefs.speakAloud = on
+        if (!on && speakingCount > 0) {
+            // Turned off in the middle of a sentence: go quiet at once and listen again.
+            runCatching { tts?.stop() }
+            speakingCount = 0
+            abandonFocus()
+            scheduleListen(150)
+        }
+        LiveBus.post(LiveBus.Event.Speaker(on))
+        updateNotification()
+    }
+
+    private fun speak(text: String, lang: Lang, id: String) {
         val t = tts ?: return
+        if (!ttsReady) return
         // Pause the microphone so the phone does not translate its own voice.
         speakingCount++
         cancelRecognizer()
         main.removeCallbacks(startRunnable)
         requestDuckingFocus()
-        t.language = Locale.forLanguageTag(record.target.locale)
-        t.speak(record.translated, TextToSpeech.QUEUE_ADD, null, "utt-${record.id}")
+        t.language = Locale.forLanguageTag(lang.locale)
+        if (t.speak(text, TextToSpeech.QUEUE_ADD, null, id) != TextToSpeech.SUCCESS) onSpoken()
     }
 
     private val ttsListener = object : UtteranceProgressListener() {
@@ -465,6 +512,11 @@ class TranslatorService : Service() {
             this, 0, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+        val speakerOn = prefs.speakAloud
+        val speaker = PendingIntent.getService(
+            this, 2, Intent(this, TranslatorService::class.java).setAction(ACTION_SPEAKER).putExtra("on", !speakerOn),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val stop = PendingIntent.getService(
             this, 1, Intent(this, TranslatorService::class.java).setAction(ACTION_STOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -480,6 +532,7 @@ class TranslatorService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setContentIntent(open)
+            .addAction(0, getString(if (speakerOn) R.string.speaker_turn_off else R.string.speaker_turn_on), speaker)
             .addAction(0, getString(R.string.stop), stop)
             .build()
     }

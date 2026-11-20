@@ -9,8 +9,9 @@ and keeps going for as long as it is switched on. It does not touch the Traducto
 2. Tap **Start listening** and allow the microphone and notifications.
 3. Tap **Allow 24/7** once, so Android does not pause the app at night.
 4. The first start downloads the Spanish–English language pack (about 30 MB, one time). After that, translation works offline.
-5. Talk. Each sentence appears with its translation and, if **Speak translations aloud** is on, is spoken in the other language.
-6. **Saved translations**: search, delete, share as `.txt` or `.csv`, and choose how long to keep them.
+5. Talk. Each sentence appears with its translation.
+6. **Speaker button** (🔊 / 🔇): tap it at any time to have translations read aloud or to stay silent. It also works from the notification while the screen is off, and turning it off in the middle of a sentence stops at once. Tap 🔊 on any translation to hear it again.
+7. **Saved translations**: search, delete, share as `.txt` or `.csv`, and choose how long to keep them.
 
 Modes: **Auto ES⇄EN** detects who is speaking. **Español → EN** and **English → ES** lock the direction, which is the most reliable option when only one person talks.
 
@@ -32,11 +33,17 @@ cd voice-translator
 Needs the Android SDK (`local.properties` → `sdk.dir`). The release is signed with a key from `keystore.properties` (not in git). Without that file the APK gets debug signing.
 
 ## Tests
-25 automated tests (`app/src/test`), including 10 full simulated conversations:
-basic two-person conversation, sentence split by a pause, unfinished sentence timeout, auto-detect without
-recognizer help, filler sounds ignored, Spanish-locked mode, English-locked mode, translation failure still saved,
-a 2-hour non-stop conversation (1,440 sentences, order kept, all saved), and a mixed realistic conversation with export.
-The database tests check saving, reopening, search, deletion, retention and the size of a busy day (5,000 sentences < 2 MB).
+119 automated tests (`app/src/test`):
 
-The whole suite was run 10 times in a row: 10/10 passed (250 test executions, 0 failures).
+- **100 conversation tests, each with different sentences.** Every test has its own Spanish sentence and its own
+  English sentence, so 200 sentences in total, and none is repeated (`app/src/test/resources/*.tsv`; a test checks this).
+  Ten situations rotate across the 100 tests: phone reports the language; older phone that doesn't; Spanish speaker
+  pauses mid-sentence; English speaker pauses mid-sentence; filler sounds and noise; direction locked with the buttons;
+  English first with the microphone primed for Spanish; translator busy on the first try; messy recognizer text; and quick
+  back-and-forth. Each checks the direction, that the whole sentence was kept, the translation, saving, and export.
+- A 2-hour non-stop session with 1,440 sentences that are all different: order kept, all saved, under 300 KB.
+- Speaker button: tapping turns it off and on, it is remembered, and every saved translation has a 🔊 play button.
+- Logic tests (language guess, sentence joining, restart back-off, retention, export) and database tests.
+
+Version 1.1 result: all 119 tests passed on 3 separate full runs.
 The microphone, Google speech recognition and ML Kit translation only run on a real phone, so they still need a test on a device.
