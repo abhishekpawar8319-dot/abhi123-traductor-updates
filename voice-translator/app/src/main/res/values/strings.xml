@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Voz Traductor</string>
+    <string name="subtitle">Español ⇄ English · conversation</string>
+    <string name="start">Start listening</string>
+    <string name="stop">Stop</string>
+    <string name="mode_auto">Auto ES⇄EN</string>
+    <string name="mode_es">Español → EN</string>
+    <string name="mode_en">English → ES</string>
+    <string name="speak_aloud">Speak translations aloud</string>
+    <string name="history">Saved translations</string>
+    <string name="battery">Allow 24/7</string>
+    <string name="not_translated">(not translated – language pack not ready)</string>
+    <string name="channel_name">Translator running</string>
+    <string name="channel_resume">Resume after restart</string>
+    <string name="notif_title">Voz Traductor · %1$d sentences</string>
+    <string name="resume_title">Voz Traductor stopped</string>
+    <string name="resume_text">The phone restarted. Tap to keep translating.</string>
+    <string name="status_starting">Starting…</string>
+    <string name="status_listening_auto">Listening… speak Spanish or English</string>
+    <string name="status_listening_es">Escuchando español…</string>
+    <string name="status_listening_en">Listening for English…</string>
+    <string name="status_stopped">Stopped. Tap Start to translate.</string>
+    <string name="status_need_mic">Microphone permission is needed.</string>
+    <string name="status_open_app">Open the app to start listening.</string>
+    <string name="status_no_recognizer">No speech recognition on this phone. Install or update the Google app.</string>
+    <string name="status_downloading">Downloading Spanish–English pack (one time, about 30 MB)…</string>
+    <string name="status_download_failed">Language pack download failed, retrying. Connect to the internet once.</string>
+    <string name="status_translate_failed">Could not translate the last sentence; it was saved untranslated.</string>
+    <string name="search_hint">Search saved translations</string>
+    <string name="keep_for">Keep for</string>
+    <string name="history_info">%1$d sentences saved · %2$s used</string>
+    <string name="export">Share</string>
+    <string name="export_txt">Share .txt</string>
+    <string name="export_csv">Share .csv</string>
+    <string name="delete">Delete</string>
+    <string name="delete_all">Delete all</string>
+    <string name="delete_one">Delete this translation?</string>
+    <string name="delete_all_confirm">Delete every saved translation? This cannot be undone.</string>
+    <string-array name="retention_labels">
+        <item>30 days</item>
+        <item>90 days</item>
+        <item>6 months</item>
+        <item>1 year</item>
+        <item>Forever</item>
+    </string-array>
+</resources>

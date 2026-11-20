@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#0F1720</color>
+    <color name="card">#1A2532</color>
+    <color name="text">#F1F5F9</color>
+    <color name="muted">#94A3B8</color>
+    <color name="accent">#22C55E</color>
+    <color name="danger">#EF4444</color>
+    <color name="chip">#243244</color>
+
+    <style name="Theme.Voz" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
+
+    <style name="Chip">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:background">@drawable/chip_bg</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="FlatButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:background">@drawable/flat_bg</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+</resources>
