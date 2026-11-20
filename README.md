@@ -9,7 +9,7 @@ To publish a version: replace the APK and raise `versionCode` in latest.json.
 
 To install by hand: download `SpanishTranslator.apk` and open it on the phone.
 
-## Voz Traductor (new, separate app)
+## Abhishek – Spanish ⇄ English voice translator (separate app)
 
-`VozTraductor.apk` is a separate app for live Spanish ⇄ English conversation translation that stays on 24/7 and saves every sentence.
+`Abhishek.apk` is a separate app for live Spanish ⇄ English conversation translation that stays on 24/7 and saves every sentence.
 It installs next to Traductor and does not change it. Source code and details: [`voice-translator/`](voice-translator/README.md).

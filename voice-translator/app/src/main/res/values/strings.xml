@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Voz Traductor</string>
+    <string name="app_name">Abhishek</string>
     <string name="subtitle">Español ⇄ English · conversation</string>
     <string name="start">Start listening</string>
     <string name="stop">Stop</string>
@@ -18,8 +18,8 @@
     <string name="not_translated">(not translated – language pack not ready)</string>
     <string name="channel_name">Translator running</string>
     <string name="channel_resume">Resume after restart</string>
-    <string name="notif_title">Voz Traductor · %1$d sentences</string>
-    <string name="resume_title">Voz Traductor stopped</string>
+    <string name="notif_title">Abhishek · %1$d sentences</string>
+    <string name="resume_title">Abhishek stopped</string>
     <string name="resume_text">The phone restarted. Tap to keep translating.</string>
     <string name="status_starting">Starting…</string>
     <string name="status_listening_auto">Listening… speak Spanish or English</string>

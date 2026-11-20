@@ -10,7 +10,7 @@ object TranscriptExporter {
     fun toText(records: List<TranslationRecord>, zone: TimeZone = TimeZone.getDefault()): String {
         val day = SimpleDateFormat("EEEE d MMMM yyyy", Locale.ENGLISH).apply { timeZone = zone }
         val time = SimpleDateFormat("HH:mm:ss", Locale.ENGLISH).apply { timeZone = zone }
-        val sb = StringBuilder("Voz Traductor – Español ⇄ English\n")
+        val sb = StringBuilder("Abhishek – Español ⇄ English\n")
         var lastDay = ""
         for (r in records.sortedBy { it.timeMillis }) {
             val d = day.format(Date(r.timeMillis))

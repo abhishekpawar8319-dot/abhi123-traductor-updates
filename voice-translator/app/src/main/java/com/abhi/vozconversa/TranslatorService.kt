@@ -445,7 +445,7 @@ class TranslatorService : Service() {
 
     private fun acquireWakeLock() {
         val pm = getSystemService(POWER_SERVICE) as PowerManager
-        wakeLock = (wakeLock ?: pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VozTraductor:listen")).also {
+        wakeLock = (wakeLock ?: pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Abhishek:listen")).also {
             it.setReferenceCounted(false)
             it.acquire(2 * 3600_000L)
         }

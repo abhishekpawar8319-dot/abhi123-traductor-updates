@@ -20,6 +20,12 @@ import android.os.Looper
 @Config(sdk = [34])
 class SpeakerButtonTest {
 
+    @Test fun appIsNamedAbhishek() {
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        assertEquals("Abhishek", activity.getString(R.string.app_name))
+        assertEquals("Abhishek", activity.applicationInfo.loadLabel(activity.packageManager).toString())
+    }
+
     @Test fun tapTurnsSpeakerOffAndOnAndIsRemembered() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         Prefs(ctx).speakAloud = true

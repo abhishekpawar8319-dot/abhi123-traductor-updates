@@ -1,11 +1,11 @@
-# Voz Traductor – Spanish ⇄ English conversation translator
+# Abhishek – Spanish ⇄ English conversation translator
 
 A separate Android app (`com.abhi.vozconversa`) that does one job: it listens to a conversation,
 waits for each **whole sentence**, translates Spanish → English or English → Spanish, **saves** it,
 and keeps going for as long as it is switched on. It does not touch the Traductor app or its data.
 
 ## How to use
-1. Install `VozTraductor.apk` (in the repository root) and open it.
+1. Install `Abhishek.apk` (in the repository root) and open it.
 2. Tap **Start listening** and allow the microphone and notifications.
 3. Tap **Allow 24/7** once, so Android does not pause the app at night.
 4. The first start downloads the Spanish–English language pack (about 30 MB, one time). After that, translation works offline.
