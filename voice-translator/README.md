@@ -11,7 +11,11 @@ and keeps going for as long as it is switched on. It does not touch the Traducto
 4. The first start downloads the Spanish–English language pack (about 30 MB, one time). After that, translation works offline.
 5. Talk. Each sentence appears with its translation.
 6. **Speaker button** (🔊 / 🔇): tap it at any time to have translations read aloud or to stay silent. It also works from the notification while the screen is off, and turning it off in the middle of a sentence stops at once. Tap 🔊 on any translation to hear it again.
-7. **Saved translations**: search, delete, share as `.txt` or `.csv`, and choose how long to keep them.
+7. **Fix a misheard word** (✏️ on any sentence, or tap the sentence): tap only the wrong word, then pick a
+   suggestion, type the right spelling, or press **🎤 Say just this word**. The sentence is translated again and the
+   saved entry updated, with no need to repeat the whole sentence. With **Always change** ticked, the app learns the fix and
+   corrects that word by itself next time (see **📖 Word fixes** in Saved translations to remove one).
+8. **Saved translations**: search, delete, share as `.txt` or `.csv`, and choose how long to keep them.
 
 Modes: **Auto ES⇄EN** detects who is speaking. **Español → EN** and **English → ES** lock the direction, which is the most reliable option when only one person talks.
 
@@ -25,6 +29,21 @@ Modes: **Auto ES⇄EN** detects who is speaking. **Español → EN** and **Engli
 | Saved | Every sentence goes into an on-phone SQLite database straight away, even if translation fails (it is then saved untranslated). |
 | Doesn't disturb the phone | Text only, no audio is stored (about 200 bytes per sentence, under 2 MB for a very busy day). Old entries are removed automatically (1 year by default; 30 days–forever). The notification is low priority, with no sound or vibration. When speaking a translation, the app lowers other audio instead of stopping it and pauses the microphone so it does not translate itself. |
 
+## Sentence auditor
+Every sentence is checked before it is translated:
+
+| Check | What happens |
+|---|---|
+| A word you taught it ("tore" → "torre") | fixed automatically |
+| A small word said twice ("the the", "la la") | fixed automatically (real repeats like "no no" are kept) |
+| Spanish word without its accent ("camion", "dia", "telefono") | fixed automatically |
+| Spanish question without accent ("Donde está…?") | becomes "¿Dónde está…?" |
+| A word from the other language ("Necesito **the** herramientas") | shown in orange; tap to fix |
+| A word the recognizer was unsure about (its other guesses differ) | shown in orange with the other guesses as one-tap suggestions |
+| Other repeated words ("we work work") | shown in orange |
+
+Names such as Los Angeles, El Paso or Rio de Janeiro are not flagged.
+
 ## Build
 ```
 cd voice-translator
@@ -33,17 +52,20 @@ cd voice-translator
 Needs the Android SDK (`local.properties` → `sdk.dir`). The release is signed with a key from `keystore.properties` (not in git). Without that file the APK gets debug signing.
 
 ## Tests
-119 automated tests (`app/src/test`):
+228 automated tests (`app/src/test`):
 
-- **100 conversation tests, each with different sentences.** Every test has its own Spanish sentence and its own
-  English sentence, so 200 sentences in total, and none is repeated (`app/src/test/resources/*.tsv`; a test checks this).
-  Ten situations rotate across the 100 tests: phone reports the language; older phone that doesn't; Spanish speaker
-  pauses mid-sentence; English speaker pauses mid-sentence; filler sounds and noise; direction locked with the buttons;
-  English first with the microphone primed for Spanish; translator busy on the first try; messy recognizer text; and quick
-  back-and-forth. Each checks the direction, that the whole sentence was kept, the translation, saving, and export.
-- A 2-hour non-stop session with 1,440 sentences that are all different: order kept, all saved, under 300 KB.
-- Speaker button: tapping turns it off and on, it is remembered, and every saved translation has a 🔊 play button.
-- Logic tests (language guess, sentence joining, restart back-off, retention, export) and database tests.
+- **Auditor, round 1: 100 tests with 100 different sentences** (10 groups of 10): learned fixes, doubled words,
+  missing accents, Spanish questions, English inside Spanish, Spanish inside English, recognizer unsure, tap-to-fix-and-learn,
+  correct sentences left alone, and the full flow (heard → audited → translated → saved → one word fixed → re-translated →
+  same entry updated). Deliberately breaking the auditor makes these tests fail, so they really check it.
+- **Auditor, round 2:** 100 new correct sentences with tricky words ("no", "me", "Que tengas…", "café", "piñata", place names)
+  must come through untouched. *This round found 4 mistakes* (Los Angeles, El Paso, Las Vegas and Rio de Janeiro were wrongly
+  flagged); fixed and re-tested.
+- **Auditor, round 3:** 100 new mistakes injected into correct sentences (29 missing accents, 43 doubled words, 28 other-language
+  words): all repaired or pointed out exactly.
+- The 200 earlier sentences pass the auditor with no false alarms, and 100 conversation tests now run with the auditor on.
+- Upgrading from 1.2 keeps saved translations; the fix window opens and marks only the doubtful word.
+- 100 conversation tests, a 2-hour session with 1,440 different sentences, speaker button, storage and logic tests.
 
-Version 1.1 result: all 119 tests passed on 3 separate full runs.
+Version 1.3 result: all 228 tests passed on 3 separate full runs.
 The microphone, Google speech recognition and ML Kit translation only run on a real phone, so they still need a test on a device.

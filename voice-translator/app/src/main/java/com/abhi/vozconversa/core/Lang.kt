@@ -30,6 +30,8 @@ data class TranslationRecord(
     val source: Lang,
     val original: String,
     val translated: String,
+    /** The recognizer's other guesses for this sentence, used to point at doubtful words. */
+    val alternatives: List<String> = emptyList(),
 ) {
     val target: Lang get() = source.other
 }

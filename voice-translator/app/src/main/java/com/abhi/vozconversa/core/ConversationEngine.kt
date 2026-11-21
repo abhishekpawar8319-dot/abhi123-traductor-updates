@@ -14,6 +14,9 @@ interface TextTranslator {
 interface HistoryStore {
     /** Saves the record and returns its id. */
     fun save(record: TranslationRecord): Long
+
+    /** Replaces a saved record (same id) after the user fixed it. */
+    fun update(record: TranslationRecord) {}
 }
 
 /**
@@ -32,13 +35,18 @@ class ConversationEngine(
     private val clock: () -> Long = System::currentTimeMillis,
     private val holdMillis: Long = 1800,
     private val listener: Listener,
+    /** Checks and auto-fixes each sentence before translating; null = translate as heard. */
+    private val auditor: SentenceAuditor? = null,
 ) {
     interface Listener {
         fun onTranslated(record: TranslationRecord)
         fun onError(message: String, record: TranslationRecord) {}
     }
 
-    private data class Pending(val text: String, val mode: ListenMode, val detected: Lang?, val listening: Lang, val time: Long)
+    private data class Pending(
+        val text: String, val mode: ListenMode, val detected: Lang?, val listening: Lang, val time: Long,
+        val alternatives: List<String> = emptyList(),
+    )
 
     private val mutex = Mutex()
     private var pending: Pending? = null
@@ -46,13 +54,17 @@ class ConversationEngine(
     private val work = mutableListOf<Job>()
 
     /** Called with each final recognizer result. Returns the language it decided on, or null if ignored. */
-    fun onUtterance(raw: String, mode: ListenMode, detected: Lang?, listening: Lang): Lang? {
+    fun onUtterance(
+        raw: String, mode: ListenMode, detected: Lang?, listening: Lang, alternatives: List<String> = emptyList(),
+    ): Lang? {
         val clean = SentenceText.normalize(raw)
         if (SentenceText.isNoise(clean)) return null
         holdJob?.cancel()
         val prev = pending
         val combined = if (prev != null) SentenceText.join(prev.text, clean) else clean
-        val item = Pending(combined, mode, detected ?: prev?.detected, listening, prev?.time ?: clock())
+        // Alternatives only describe a single recognizer result, not a joined sentence.
+        val alts = if (prev == null) alternatives.filter { it.isNotBlank() && !it.equals(raw, ignoreCase = true) } else emptyList()
+        val item = Pending(combined, mode, detected ?: prev?.detected, listening, prev?.time ?: clock(), alts)
         val source = DirectionDecider.sourceOf(item.text, item.mode, item.detected, item.listening)
         if (SentenceText.looksUnfinished(combined)) {
             pending = item
@@ -86,11 +98,12 @@ class ConversationEngine(
         val job = scope.launch {
             mutex.withLock {
                 val source = DirectionDecider.sourceOf(p.text, p.mode, p.detected, p.listening)
+                val text = auditor?.audit(p.text, source, p.alternatives)?.text ?: p.text
                 var translated = ""
                 var error: String? = null
                 for (attempt in 0 until 2) {
                     try {
-                        translated = translator.translate(p.text, source).trim()
+                        translated = translator.translate(text, source).trim()
                         error = null
                         break
                     } catch (e: kotlinx.coroutines.CancellationException) {
@@ -101,7 +114,7 @@ class ConversationEngine(
                 }
                 val rec = TranslationRecord(
                     timeMillis = p.time, sessionId = sessionId, source = source,
-                    original = p.text, translated = translated,
+                    original = text, translated = translated, alternatives = p.alternatives,
                 )
                 val saved = rec.copy(id = store.save(rec))
                 if (error != null) listener.onError(error, saved) else listener.onTranslated(saved)

@@ -14,6 +14,9 @@
             android:text="@string/keep_for" android:textColor="@color/muted" />
         <Spinner android:id="@+id/retention" android:layout_width="wrap_content" android:layout_height="48dp"
             android:layout_marginStart="8dp" android:background="@drawable/flat_bg" android:paddingHorizontal="8dp" />
+        <Button android:id="@+id/learned" android:layout_width="wrap_content" android:layout_height="44dp"
+            android:layout_marginStart="8dp" android:background="@drawable/flat_bg" android:paddingHorizontal="12dp"
+            android:text="@string/learned_title" android:textAllCaps="false" android:textColor="@color/text" />
     </LinearLayout>
     <TextView android:id="@+id/info" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginVertical="6dp" android:textColor="@color/muted" android:textSize="13sp" />

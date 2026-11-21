@@ -33,6 +33,7 @@ import com.abhi.vozconversa.core.Lang
 import com.abhi.vozconversa.core.ListenMode
 import com.abhi.vozconversa.core.RestartPolicy
 import com.abhi.vozconversa.core.Retention
+import com.abhi.vozconversa.core.SentenceAuditor
 import com.abhi.vozconversa.core.TranslationRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,8 @@ class TranslatorService : Service() {
         const val ACTION_SETTINGS_CHANGED = "com.abhi.vozconversa.SETTINGS"
         const val ACTION_SPEAKER = "com.abhi.vozconversa.SPEAKER"
         const val ACTION_SAY = "com.abhi.vozconversa.SAY"
+        const val ACTION_PAUSE = "com.abhi.vozconversa.PAUSE"
+        const val ACTION_RESUME = "com.abhi.vozconversa.RESUME"
         const val EXTRA_TEXT = "text"
         const val EXTRA_LANG = "lang"
         private const val CHANNEL = "voz_running"
@@ -83,6 +86,15 @@ class TranslatorService : Service() {
                 Intent(ctx, TranslatorService::class.java).setAction(ACTION_SAY)
                     .putExtra(EXTRA_TEXT, text).putExtra(EXTRA_LANG, lang.name)
             )
+        }
+
+        /** Frees the microphone for a moment (to say one word for a fix), then [resume]. */
+        fun pause(ctx: Context) {
+            if (running) ctx.startService(Intent(ctx, TranslatorService::class.java).setAction(ACTION_PAUSE))
+        }
+
+        fun resume(ctx: Context) {
+            if (running) ctx.startService(Intent(ctx, TranslatorService::class.java).setAction(ACTION_RESUME))
         }
 
         fun settingsChanged(ctx: Context) {
@@ -118,6 +130,8 @@ class TranslatorService : Service() {
     private var useLanguageDetection = true
 
     private val startRunnable = Runnable { startListening() }
+    private var paused = false
+    private val autoResume = Runnable { if (paused) { paused = false; startListening() } }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -136,6 +150,20 @@ class TranslatorService : Service() {
                     val on = if (intent.hasExtra("on")) intent.getBooleanExtra("on", true) else !prefs.speakAloud
                     applySpeaker(on)
                 }
+                return START_STICKY
+            }
+            ACTION_PAUSE -> {
+                if (running) {
+                    paused = true
+                    main.removeCallbacks(startRunnable)
+                    cancelRecognizer()
+                    main.removeCallbacks(autoResume)
+                    main.postDelayed(autoResume, 90_000) // never stay deaf if resume is missed
+                }
+                return START_STICKY
+            }
+            ACTION_RESUME -> {
+                if (running && paused) { paused = false; main.removeCallbacks(autoResume); scheduleListen(400) }
                 return START_STICKY
             }
             ACTION_SAY -> {
@@ -177,7 +205,10 @@ class TranslatorService : Service() {
         prefs.wasRunning = true
         acquireWakeLock()
         val sessionId = System.currentTimeMillis()
-        engine = ConversationEngine(scope, translator, db, sessionId, listener = engineListener)
+        engine = ConversationEngine(
+            scope, translator, db, sessionId, listener = engineListener,
+            auditor = SentenceAuditor(Corrections.dictionary(this)),
+        )
         tts = TextToSpeech(this) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
             tts?.setOnUtteranceProgressListener(ttsListener)
@@ -212,7 +243,8 @@ class TranslatorService : Service() {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, listeningLang.locale)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+            // Ask for the recognizer's other guesses too: they show which words it was unsure about.
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
             // Wait for a real pause before ending the sentence, so whole sentences are captured.
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
@@ -232,7 +264,7 @@ class TranslatorService : Service() {
 
     private fun startListening() {
         main.removeCallbacks(startRunnable)
-        if (!running || speakingCount > 0 || listening) return
+        if (!running || paused || speakingCount > 0 || listening) return
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             status(getString(R.string.status_no_recognizer))
             scheduleListen(30_000)
@@ -298,11 +330,12 @@ class TranslatorService : Service() {
             touch()
             listening = false
             policy.onSuccess()
-            val text = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+            val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty()
+            val text = all.firstOrNull()
             LiveBus.post(LiveBus.Event.Partial(""))
             if (!text.isNullOrBlank()) {
                 val mode = prefs.mode
-                val source = engine?.onUtterance(text, mode, detectedLang, listeningLang)
+                val source = engine?.onUtterance(text, mode, detectedLang, listeningLang, all.drop(1))
                 // In a two-person conversation the next sentence is most likely the other language.
                 if (mode == ListenMode.AUTO && source != null) listeningLang = source.other
             }
@@ -336,7 +369,9 @@ class TranslatorService : Service() {
         override fun run() {
             if (!running) return
             val idle = SystemClock.elapsedRealtime() - lastEventAt
-            if (speakingCount == 0) {
+            if (paused) {
+                touch()
+            } else if (speakingCount == 0) {
                 if (listening && idle > 25_000) { destroyRecognizer(); startListening() }
                 else if (!listening && idle > 15_000) startListening()
             } else if (idle > 60_000) {

@@ -50,12 +50,22 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
     private val time = SimpleDateFormat("HH:mm", Locale.getDefault())
     var onLongPress: ((TranslationRecord) -> Unit)? = null
     var onPlay: ((TranslationRecord) -> Unit)? = null
+    var onFix: ((TranslationRecord) -> Unit)? = null
+    /** Marks doubtful words in each sentence. */
+    var auditor: com.abhi.vozconversa.core.SentenceAuditor? = null
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
         val tag: TextView = v.findViewById(R.id.tag)
         val original: TextView = v.findViewById(R.id.original)
         val translated: TextView = v.findViewById(R.id.translated)
         val play: Button = v.findViewById(R.id.play)
+        val fix: Button = v.findViewById(R.id.fix)
+    }
+
+    /** Puts a fixed sentence back in place. */
+    fun update(r: TranslationRecord) {
+        val i = items.indexOfFirst { it.id == r.id }
+        if (i >= 0) { items[i] = r; notifyItemChanged(i) }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -74,7 +84,12 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
             h.itemView.context, r.timeMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH
         ) + " "
         h.tag.text = "${r.source.short} → ${r.target.short} · $day${time.format(Date(r.timeMillis))}"
-        h.original.text = r.original
+        val audit = auditor?.audit(r.original, r.source, r.alternatives)
+        h.original.text = if (audit != null) highlightIssues(r.original, audit) else r.original
+        val doubtful = audit != null && audit.issues.isNotEmpty()
+        h.fix.text = if (doubtful) "⚠✏️" else "✏️"
+        h.fix.setOnClickListener { onFix?.invoke(r) }
+        h.original.setOnClickListener { onFix?.invoke(r) }
         h.translated.text = r.translated.ifBlank { h.itemView.context.getString(R.string.not_translated) }
         h.itemView.setOnLongClickListener { onLongPress?.invoke(r); onLongPress != null }
         h.play.visibility = if (r.translated.isBlank()) View.INVISIBLE else View.VISIBLE
@@ -100,6 +115,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var modeButtons: Map<ListenMode, Button>
     private lateinit var speakerButton: Button
     private val speaker = lazy { Speaker(this) }
+    private lateinit var fixUi: FixUi
 
     private val busListener: (LiveBus.Event) -> Unit = { e ->
         when (e) {
@@ -142,6 +158,9 @@ class MainActivity : AppCompatActivity() {
             showSpeaker()
         }
         adapter.onPlay = { r -> playTranslation(this, speaker, r) }
+        fixUi = FixUi(this) { r -> adapter.update(r) }
+        adapter.auditor = fixUi.auditor
+        adapter.onFix = { r -> fixUi.open(r) }
         showSpeaker()
         toggle.setOnClickListener {
             if (TranslatorService.running) TranslatorService.stop(this) else startWithPermissions()
@@ -176,6 +195,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         if (speaker.isInitialized()) speaker.value.shutdown()
+        fixUi.close()
         super.onDestroy()
     }
 
@@ -240,10 +260,15 @@ class HistoryActivity : AppCompatActivity() {
     private var query = ""
     private val speaker = lazy { Speaker(this) }
     private val retentionChoices = intArrayOf(30, 90, 180, 365, 0)
+    private lateinit var fixUi: FixUi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
+        fixUi = FixUi(this) { r -> adapter.update(r) }
+        adapter.auditor = fixUi.auditor
+        adapter.onFix = { r -> fixUi.open(r) }
+        findViewById<Button>(R.id.learned).setOnClickListener { fixUi.showLearned() }
         db = HistoryDb.get(this)
         info = findViewById(R.id.info)
         findViewById<RecyclerView>(R.id.list).apply {
@@ -291,6 +316,7 @@ class HistoryActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         if (speaker.isInitialized()) speaker.value.shutdown()
+        fixUi.close()
         super.onDestroy()
     }
 

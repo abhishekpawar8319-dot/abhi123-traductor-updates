@@ -72,6 +72,7 @@ fun TestScope.runConversation(
             override fun onTranslated(record: TranslationRecord) { delivered += record }
             override fun onError(message: String, record: TranslationRecord) { delivered += record }
         },
+        auditor = com.abhi.vozconversa.core.SentenceAuditor(), // as in the app
     )
     // Same steps as TranslatorService: in AUTO mode the recognizer is primed for the other language next.
     var listening = startListening
