@@ -9,7 +9,9 @@ import com.abhi.vozconversa.core.ListenMode
 import com.abhi.vozconversa.core.TextTranslator
 import com.abhi.vozconversa.core.TranslationRecord
 import com.google.mlkit.common.model.DownloadConditions
+import com.google.mlkit.common.model.RemoteModelManager
 import com.google.mlkit.nl.translate.TranslateLanguage
+import com.google.mlkit.nl.translate.TranslateRemoteModel
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import kotlinx.coroutines.tasks.await
@@ -71,15 +73,30 @@ class MlKitTranslator : TextTranslator {
             .setTargetLanguage(TranslateLanguage.SPANISH).build()
     )
 
+    private val spanishModel = TranslateRemoteModel.Builder(TranslateLanguage.SPANISH).build()
+    @Volatile private var packOnPhone = false
+
+    /** True when the Spanish–English pack is stored on the phone (then no internet is needed). */
+    suspend fun isReady(): Boolean {
+        if (!packOnPhone) {
+            packOnPhone = runCatching { RemoteModelManager.getInstance().isModelDownloaded(spanishModel).await() }.getOrDefault(false)
+        }
+        return packOnPhone
+    }
+
+    /** Downloads the pack once (needs internet). Does nothing if it is already on the phone. */
     suspend fun prepare() {
+        if (isReady()) return
         val any = DownloadConditions.Builder().build()
         esEn.downloadModelIfNeeded(any).await()
         enEs.downloadModelIfNeeded(any).await()
+        packOnPhone = true
     }
 
     override suspend fun translate(text: String, source: Lang): String {
         val client = if (source == Lang.ES) esEn else enEs
-        client.downloadModelIfNeeded(DownloadConditions.Builder().build()).await()
+        // Pack on the phone: translate straight away, fully offline. Otherwise try to fetch it first.
+        if (!isReady()) prepare()
         return client.translate(text).await()
     }
 
@@ -91,6 +108,7 @@ class MlKitTranslator : TextTranslator {
 
 /** Reads a single translation aloud when the listening service is not running. */
 class Speaker(context: Context) {
+    private val appContext = context.applicationContext
     private var tts: TextToSpeech? = null
     private var ready = false
     private var queued: Pair<String, Lang>? = null
@@ -105,7 +123,7 @@ class Speaker(context: Context) {
     fun say(text: String, lang: Lang) {
         val t = tts ?: return
         if (!ready) { queued = text to lang; return }
-        t.language = java.util.Locale.forLanguageTag(lang.locale)
+        TtsVoices.applyTo(t, lang, online = Net.isOnline(appContext))
         t.speak(text, TextToSpeech.QUEUE_FLUSH, null, "replay")
     }
 

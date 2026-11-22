@@ -116,6 +116,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var speakerButton: Button
     private val speaker = lazy { Speaker(this) }
     private lateinit var fixUi: FixUi
+    private lateinit var offlineUi: OfflineUi
 
     private val busListener: (LiveBus.Event) -> Unit = { e ->
         when (e) {
@@ -161,6 +162,12 @@ class MainActivity : AppCompatActivity() {
         fixUi = FixUi(this) { r -> adapter.update(r) }
         adapter.auditor = fixUi.auditor
         adapter.onFix = { r -> fixUi.open(r) }
+        val offlineButton = findViewById<Button>(R.id.offline)
+        offlineUi = OfflineUi(this) { r ->
+            offlineButton.text = getString(if (r.ready) R.string.offline_button_ready else R.string.offline_button_not_ready)
+            offlineButton.isActivated = r.ready
+        }
+        offlineButton.setOnClickListener { offlineUi.show() }
         showSpeaker()
         toggle.setOnClickListener {
             if (TranslatorService.running) TranslatorService.stop(this) else startWithPermissions()
@@ -181,6 +188,7 @@ class MainActivity : AppCompatActivity() {
         LiveBus.add(busListener)
         showStatus(LiveBus.lastStatus.copy(running = TranslatorService.running))
         showSpeaker() // may have been changed from the notification
+        offlineUi.refresh() // packs may have been downloaded in the phone settings meanwhile
         io.execute {
             val list = HistoryDb.get(this).recent(100)
             runOnUiThread { adapter.setAll(list) }

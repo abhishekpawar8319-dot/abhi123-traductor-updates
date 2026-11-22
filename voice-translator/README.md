@@ -29,6 +29,20 @@ Modes: **Auto ES⇄EN** detects who is speaking. **Español → EN** and **Engli
 | Saved | Every sentence goes into an on-phone SQLite database straight away, even if translation fails (it is then saved untranslated). |
 | Doesn't disturb the phone | Text only, no audio is stored (about 200 bytes per sentence, under 2 MB for a very busy day). Old entries are removed automatically (1 year by default; 30 days–forever). The notification is low priority, with no sound or vibration. When speaking a translation, the app lowers other audio instead of stopping it and pauses the microphone so it does not translate itself. |
 
+## Working offline (no internet)
+Set up once while connected: tap **📴 Offline** on the main screen, then **1. Download all** (translation pack and, on
+Android 13+, the Spanish and English speech models), then **2. Phone settings** to check that Spanish and English are
+downloaded for offline speech recognition and for text-to-speech. The button shows **Offline: ready ✅** when done.
+
+After that:
+- Listening switches to the speech pack on the phone as soon as the internet goes (no signal, airplane mode, Wi-Fi without
+  internet) and back to Google's online recognizer when it returns. It never waits on network retries.
+- Translation uses the pack on the phone and never checks the internet.
+- The speaker uses a voice stored on the phone.
+- "Say just this word" also works offline.
+- Offline speech packs understand one language at a time, so in Auto mode the app alternates Spanish/English between turns.
+  For one person talking, the ES/EN buttons work best offline.
+
 ## Sentence auditor
 Every sentence is checked before it is translated:
 
@@ -67,5 +81,9 @@ Needs the Android SDK (`local.properties` → `sdk.dir`). The release is signed 
 - Upgrading from 1.2 keeps saved translations; the fix window opens and marks only the doubtful word.
 - 100 conversation tests, a 2-hour session with 1,440 different sentences, speaker button, storage and logic tests.
 
-Version 1.3 result: all 228 tests passed on 3 separate full runs.
+- Offline (11 tests): switching when the internet drops or comes back, falling back from the on-device model to Google's
+  offline pack, missing-pack handling in Auto mode, the offline recognizer request, offline voice choice, and a conversation
+  where the internet drops mid-way and comes back (all 8 sentences translated and saved, no wait longer than 0.2 s).
+
+Version 1.4 result: all 239 tests passed on 3 separate full runs.
 The microphone, Google speech recognition and ML Kit translation only run on a real phone, so they still need a test on a device.

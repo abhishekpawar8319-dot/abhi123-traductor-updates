@@ -180,6 +180,8 @@ class FixUi(private val activity: AppCompatActivity, private val onUpdated: (Tra
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE, record.source.locale)
                 .putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+                // Works without internet when the offline speech pack is on the phone.
+                .putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, !Net.isOnline(activity))
                 .putExtra(RecognizerIntent.EXTRA_PROMPT, activity.getString(R.string.fix_say_prompt, word))
             voiceResult = { heard ->
                 if (heard.isNotEmpty()) {

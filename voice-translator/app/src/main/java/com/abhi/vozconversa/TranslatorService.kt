@@ -13,6 +13,9 @@ import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -32,6 +35,8 @@ import com.abhi.vozconversa.core.ConversationEngine
 import com.abhi.vozconversa.core.Lang
 import com.abhi.vozconversa.core.ListenMode
 import com.abhi.vozconversa.core.RestartPolicy
+import com.abhi.vozconversa.core.OfflineController
+import com.abhi.vozconversa.core.RecognizerSetup
 import com.abhi.vozconversa.core.Retention
 import com.abhi.vozconversa.core.SentenceAuditor
 import com.abhi.vozconversa.core.TranslationRecord
@@ -130,6 +135,10 @@ class TranslatorService : Service() {
     private var useLanguageDetection = true
 
     private val startRunnable = Runnable { startListening() }
+    private val offlineCtl = OfflineController(Build.VERSION.SDK_INT)
+    private var currentSetup = RecognizerSetup(onDevice = false, preferOffline = false, multiLanguageExtras = true)
+    private var recognizerOnDevice = false
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var paused = false
     private val autoResume = Runnable { if (paused) { paused = false; startListening() } }
 
@@ -213,6 +222,7 @@ class TranslatorService : Service() {
             ttsReady = status == TextToSpeech.SUCCESS
             tts?.setOnUtteranceProgressListener(ttsListener)
         }
+        watchNetwork()
         scope.launch { prepareModels() }
         prune()
         listeningLang = if (prefs.mode == ListenMode.ENGLISH) Lang.EN else Lang.ES
@@ -220,9 +230,50 @@ class TranslatorService : Service() {
         main.postDelayed(watchdog, WATCHDOG_MS)
     }
 
+    /** Follows the internet connection and switches between online and offline listening. */
+    private fun watchNetwork() {
+        offlineCtl.networkChanged(Net.isOnline(this))
+        offlineCtl.onDeviceAvailable = Build.VERSION.SDK_INT >= 31 && SpeechRecognizer.isOnDeviceRecognitionAvailable(this)
+        scope.launch { refreshInstalledSpeech() }
+        val cm = getSystemService(ConnectivityManager::class.java) ?: return
+        val cb = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) { main.post { onNetworkMaybeChanged() } }
+            override fun onLost(network: Network) { main.post { onNetworkMaybeChanged() } }
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) { main.post { onNetworkMaybeChanged() } }
+        }
+        runCatching { cm.registerDefaultNetworkCallback(cb); networkCallback = cb }
+    }
+
+    private fun stopWatchingNetwork() {
+        val cb = networkCallback ?: return
+        runCatching { getSystemService(ConnectivityManager::class.java)?.unregisterNetworkCallback(cb) }
+        networkCallback = null
+    }
+
+    private suspend fun refreshInstalledSpeech() {
+        OfflineCheck(this).installedSpeech()?.let { offlineCtl.installedOnDevice = it }
+    }
+
+    private fun onNetworkMaybeChanged() {
+        if (!running) return
+        if (offlineCtl.networkChanged(Net.isOnline(this))) {
+            // Restart listening with the right recognizer for the new connection.
+            if (speakingCount == 0 && !paused) { destroyRecognizer(); scheduleListen(300) }
+            status(null)
+        }
+    }
+
     private suspend fun prepareModels() {
         var attempt = 0
+        // Already on the phone: nothing to download, translation works offline.
+        if (translator.isReady()) { modelsReady = true; return }
         while (running && !modelsReady) {
+            if (!Net.isOnline(this)) {
+                status(getString(R.string.status_translation_pack_missing))
+                delay(15_000)
+                if (translator.isReady()) modelsReady = true
+                continue
+            }
             status(getString(R.string.status_downloading))
             try {
                 translator.prepare()
@@ -238,52 +289,47 @@ class TranslatorService : Service() {
 
     // ---------------------------------------------------------------- listening
 
-    private fun recognizerIntent(mode: ListenMode): Intent =
-        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, listeningLang.locale)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            // Ask for the recognizer's other guesses too: they show which words it was unsure about.
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
-            // Wait for a real pause before ending the sentence, so whole sentences are captured.
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1200L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 2000L)
-            if (mode == ListenMode.AUTO) {
-                putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", arrayOf(listeningLang.other.locale))
-                if (Build.VERSION.SDK_INT >= 34 && useLanguageDetection) {
-                    val both = arrayListOf(Lang.ES.locale, Lang.EN.locale)
-                    putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_DETECTION, true)
-                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_DETECTION_ALLOWED_LANGUAGES, both)
-                    putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH, RecognizerIntent.LANGUAGE_SWITCH_BALANCED)
-                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES, both)
-                }
-            }
-        }
-
     private fun startListening() {
         main.removeCallbacks(startRunnable)
         if (!running || paused || speakingCount > 0 || listening) return
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            status(getString(R.string.status_no_recognizer))
-            scheduleListen(30_000)
-            return
-        }
         val mode = prefs.mode
         when (mode) {
             ListenMode.SPANISH -> listeningLang = Lang.ES
             ListenMode.ENGLISH -> listeningLang = Lang.EN
-            ListenMode.AUTO -> Unit
+            ListenMode.AUTO -> {
+                // Offline, only languages whose speech pack works can be heard.
+                val usable = offlineCtl.usableLanguage(listeningLang)
+                if (usable == null) {
+                    status(getString(R.string.status_offline_speech_missing_both))
+                    scheduleListen(30_000)
+                    return
+                }
+                listeningLang = usable
+            }
         }
-        val r = recognizer ?: SpeechRecognizer.createSpeechRecognizer(this).also {
+        val setup = offlineCtl.setup(listeningLang)
+        val available = if (setup.onDevice && Build.VERSION.SDK_INT >= 31) SpeechRecognizer.isOnDeviceRecognitionAvailable(this)
+        else SpeechRecognizer.isRecognitionAvailable(this)
+        if (!available) {
+            status(getString(R.string.status_no_recognizer))
+            scheduleListen(30_000)
+            return
+        }
+        // Online and offline use different recognizers: swap when the set-up changes.
+        if (recognizer != null && recognizerOnDevice != setup.onDevice) destroyRecognizer()
+        val r = recognizer ?: (
+            if (setup.onDevice && Build.VERSION.SDK_INT >= 31) SpeechRecognizer.createOnDeviceSpeechRecognizer(this)
+            else SpeechRecognizer.createSpeechRecognizer(this)
+            ).also {
             it.setRecognitionListener(recognitionListener)
             recognizer = it
+            recognizerOnDevice = setup.onDevice
         }
+        currentSetup = setup
         detectedLang = null
         lastEventAt = SystemClock.elapsedRealtime()
         try {
-            r.startListening(recognizerIntent(mode))
+            r.startListening(buildRecognizerIntent(packageName, listeningLang, mode, setup, useLanguageDetection))
             listening = true
         } catch (e: Exception) {
             destroyRecognizer()
@@ -330,6 +376,7 @@ class TranslatorService : Service() {
             touch()
             listening = false
             policy.onSuccess()
+            offlineCtl.onSuccess(listeningLang)
             val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty()
             val text = all.firstOrNull()
             LiveBus.post(LiveBus.Event.Partial(""))
@@ -346,6 +393,31 @@ class TranslatorService : Service() {
             touch()
             listening = false
             if (!running) return
+            when (offlineCtl.onError(error, listeningLang, currentSetup)) {
+                OfflineController.Reaction.RETRY_OFFLINE_NOW -> {
+                    // No internet: switch to offline listening at once instead of waiting.
+                    destroyRecognizer()
+                    status(null)
+                    scheduleListen(200)
+                    return
+                }
+                OfflineController.Reaction.OFFLINE_PACK_MISSING -> {
+                    destroyRecognizer()
+                    val other = listeningLang.other
+                    if (prefs.mode == ListenMode.AUTO && offlineCtl.usableLanguage(other) == other) {
+                        listeningLang = other
+                        scheduleListen(300)
+                    } else {
+                        status(getString(
+                            R.string.status_offline_speech_missing,
+                            getString(if (listeningLang == Lang.ES) R.string.lang_spanish else R.string.lang_english),
+                        ))
+                        scheduleListen(30_000)
+                    }
+                    return
+                }
+                OfflineController.Reaction.NOT_NETWORK -> Unit
+            }
             val wait = policy.delayAfterError(error)
             if (wait == RestartPolicy.STOP) {
                 status(getString(R.string.status_need_mic))
@@ -424,7 +496,8 @@ class TranslatorService : Service() {
         cancelRecognizer()
         main.removeCallbacks(startRunnable)
         requestDuckingFocus()
-        t.language = Locale.forLanguageTag(lang.locale)
+        // Offline: use a voice stored on the phone (online-only voices would stay silent).
+        TtsVoices.applyTo(t, lang, online = !offlineCtl.offline)
         if (t.speak(text, TextToSpeech.QUEUE_ADD, null, id) != TextToSpeech.SUCCESS) onSpoken()
     }
 
@@ -491,6 +564,7 @@ class TranslatorService : Service() {
             Lang.ES -> getString(R.string.status_listening_es)
             Lang.EN -> getString(R.string.status_listening_en)
         }.let { if (prefs.mode == ListenMode.AUTO) getString(R.string.status_listening_auto) else it }
+            .let { if (offlineCtl.offline) it + getString(R.string.status_offline_suffix) else it }
         LiveBus.post(LiveBus.Event.Status(running, s))
     }
 
@@ -499,6 +573,7 @@ class TranslatorService : Service() {
         running = false
         prefs.wasRunning = false
         main.removeCallbacksAndMessages(null)
+        stopWatchingNetwork()
         destroyRecognizer()
         runCatching { tts?.stop(); tts?.shutdown() }
         tts = null
@@ -515,6 +590,7 @@ class TranslatorService : Service() {
     }
 
     override fun onDestroy() {
+        stopWatchingNetwork()
         if (running) {
             running = false
             main.removeCallbacksAndMessages(null)
