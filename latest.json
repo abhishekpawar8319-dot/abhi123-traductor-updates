@@ -1,1 +1,7 @@
-{"versionCode": 19, "name": "2.3", "apk": "SpanishTranslator.apk", "notes": "Google Drive backup: menu ⋮ › Backup & My files. Connect Drive once and every change is backed up automatically. Add photos, videos and documents to My files. Restore on a new phone."}
+{
+ "versionCode": 34,
+ "name": "2.14",
+ "apk": "SpanishTranslator.apk",
+ "edition": "public",
+ "notes": "Since 2.3: 📷 site photos and a foundation site check on every tower, with a visit update to share (2.14). 📜 All 51 Chilean PAS environmental permits with their rules (2.13, 2.12). Micropile foundation words with 2D and 3D pictures (2.10). Mic: Google's speech service, made for the OnePlus Nord CE4 / Android 16, full sentences, auto language detection (2.5–2.9). Notepad, tower remarks and a new look (2.4). This public version has no DOA calculator and no site drawing (company data)."
+}
