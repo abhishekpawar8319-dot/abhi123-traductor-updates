@@ -1,0 +1,1000 @@
+ES	statement now	El supervisor necesita la grúa
+ES	statement now	El supervisor necesita la llave inglesa
+ES	statement now	Mi compañero tiene los aisladores
+ES	statement now	Mi hermano trabaja en la oficina
+ES	statement now	Mi compañero trabaja en el hotel
+ES	statement now	La ingeniera tiene los aisladores
+ES	statement now	Juan necesita el taladro
+ES	statement now	Siempre dejamos las herramientas cerca del portón
+ES	statement now	María necesita el cable
+ES	statement now	Siempre dejamos los cables en la base
+ES	statement now	María necesita el generador
+ES	statement now	Siempre dejamos los guantes en el hotel
+ES	statement now	Mi compañero tiene los lentes
+ES	statement now	Pedro tiene las llaves
+ES	statement now	El electricista trabaja en el hotel
+ES	statement now	El electricista tiene los pernos
+ES	statement now	El supervisor necesita la radio
+ES	statement now	Pedro necesita el generador
+ES	statement now	Siempre dejamos las cuerdas en la oficina
+ES	statement now	El capataz trabaja abajo
+ES	statement past	Ayer mi hermano dejó el taladro en la base
+ES	statement past	Ayer el chofer dejó la escalera en la torre
+ES	statement past	Ayer el supervisor dejó la grúa en la torre
+ES	statement past	Ayer mi hermano dejó la radio en la oficina
+ES	statement past	Ayer mi hermano dejó el tornillo grande en el hotel
+ES	statement past	Ayer el capataz dejó la llave inglesa en el hotel
+ES	statement past	Ayer mi hermano dejó la cuerda en la oficina
+ES	statement past	Ayer Juan dejó el taladro en la torre
+ES	statement past	Ayer la ingeniera dejó el tornillo grande en la oficina
+ES	statement past	Ayer mi compañero dejó el casco en la obra
+ES	statement past	Ayer mi compañero dejó la grúa en el hotel
+ES	statement past	Ayer el electricista dejó el taladro abajo
+ES	statement past	Ayer el capataz dejó el casco en el camión
+ES	statement past	Ayer el electricista dejó la grúa en el camión
+ES	statement past	Ayer el capataz dejó la radio cerca del portón
+ES	statement past	Ayer María dejó el arnés en el almacén
+ES	statement past	Olvidé la radio en la torre
+ES	statement past	Ya revisamos las llaves
+ES	statement past	Ayer el supervisor dejó el casco en el camión
+ES	statement past	Ayer Pedro dejó la camioneta en el almacén
+ES	statement future	Juan va a limpiar el generador la próxima semana
+ES	statement future	Mi compañero va a limpiar la radio a las tres
+ES	statement future	El chofer va a cambiar la cinta métrica esta tarde
+ES	statement future	Juan va a limpiar la cinta métrica el lunes
+ES	statement future	Mi hermano va a traer la camioneta el lunes
+ES	statement future	Mi hermano va a subir la grúa en una hora
+ES	statement future	María va a subir el nivel a las tres
+ES	statement future	Juan va a cambiar la escalera a las tres
+ES	statement future	Mi compañero va a revisar la grúa la próxima semana
+ES	statement future	María va a limpiar la camioneta la próxima semana
+ES	statement future	Vamos a medir las llaves mañana
+ES	statement future	El supervisor va a bajar la radio a las tres
+ES	statement future	Mi hermano va a traer el arnés hoy
+ES	statement future	María va a medir la escalera esta noche
+ES	statement future	El capataz va a medir la escalera mañana
+ES	statement future	Juan va a traer el casco mañana
+ES	statement future	Mi hermano va a bajar la grúa esta tarde
+ES	statement future	Juan va a cambiar el taladro a las tres
+ES	statement future	El electricista va a mover la grúa hoy
+ES	statement future	El capataz va a guardar la escalera a las tres
+ES	question where	¿Dónde está la ingeniera?
+ES	question where	¿Dónde están las cuerdas?
+ES	question where	¿Dónde está la grúa?
+ES	question where	¿Dónde está el casco?
+ES	question where	¿Dónde están las herramientas?
+ES	question where	¿Dónde está la escalera?
+ES	question where	¿Dónde está el martillo?
+ES	question where	¿Dónde está el supervisor?
+ES	question where	¿Dónde están los cables?
+ES	question where	¿Dónde está mi hermano?
+ES	question where	¿Dónde está el capataz?
+ES	question where	¿Dónde están las tuercas?
+ES	question where	¿Dónde está el tornillo grande?
+ES	question where	¿Dónde está la llave inglesa?
+ES	question where	¿Dónde está la radio?
+ES	question where	¿Dónde están los pernos?
+ES	question where	¿Dónde está la cuerda?
+ES	question where	¿Dónde está María?
+ES	question where	¿Dónde está Juan?
+ES	question where	¿Dónde está el generador?
+ES	question when	¿Cuándo vamos a mover los guantes?
+ES	question when	¿Cuándo vamos a bajar los pernos?
+ES	question when	¿Cuándo vamos a subir las herramientas?
+ES	question when	¿Cuándo vamos a traer las botas?
+ES	question when	¿Cuándo vamos a cambiar las cuerdas?
+ES	question when	¿Cuándo vamos a subir las botas?
+ES	question when	¿Cuándo vamos a pintar los aisladores?
+ES	question when	¿Cuándo vamos a limpiar los lentes?
+ES	question when	¿Cuándo vamos a medir los lentes?
+ES	question when	¿Cuándo vamos a subir los pernos?
+ES	question when	¿Cuándo vamos a traer los aisladores?
+ES	question when	¿Cuándo vamos a bajar los guantes?
+ES	question when	¿Cuándo vamos a subir los lentes?
+ES	question when	¿Cuándo vamos a cambiar las llaves?
+ES	question when	¿Cuándo vamos a traer los cables?
+ES	question when	¿A qué hora llega el electricista?
+ES	question when	¿Cuándo vamos a cambiar los guantes?
+ES	question when	¿Cuándo vamos a pintar los guantes?
+ES	question when	¿Cuándo vamos a mover las botas?
+ES	question when	¿Cuándo vamos a subir los cables?
+ES	question yes/no	¿Puedes guardar el arnés?
+ES	question yes/no	¿Puedes limpiar el generador?
+ES	question yes/no	¿Puedes subir el generador?
+ES	question yes/no	¿Está el capataz en el camión?
+ES	question yes/no	¿Está el chofer en el almacén?
+ES	question yes/no	¿Puedes medir el generador?
+ES	question yes/no	¿Puedes medir el arnés?
+ES	question yes/no	¿Está el electricista en el hotel?
+ES	question yes/no	¿Está la ingeniera en la obra?
+ES	question yes/no	¿Puedes cambiar el casco?
+ES	question yes/no	¿Puedes traer la cuerda?
+ES	question yes/no	¿Está Pedro en la base?
+ES	question yes/no	¿Puedes guardar el generador?
+ES	question yes/no	¿Está Juan en la torre?
+ES	question yes/no	¿Puedes guardar la grúa?
+ES	question yes/no	¿Puedes traer la radio?
+ES	question yes/no	¿Puedes revisar el tornillo grande?
+ES	question yes/no	¿Está la ingeniera en la torre?
+ES	question yes/no	¿Puedes pintar la camioneta?
+ES	question yes/no	¿Está Juan en la obra?
+ES	polite request	Por favor, guarda los guantes abajo
+ES	polite request	Por favor, trae el cable
+ES	polite request	Por favor, guarda las tuercas en la oficina
+ES	polite request	Por favor, trae el taladro
+ES	polite request	Por favor, guarda los guantes en la obra
+ES	polite request	Por favor, guarda los guantes en el hotel
+ES	polite request	Por favor, guarda las herramientas en el camión
+ES	polite request	Por favor, guarda las cuerdas arriba
+ES	polite request	¿Me pasas la cinta métrica, por favor?
+ES	polite request	Por favor, guarda las herramientas cerca del portón
+ES	polite request	Por favor, guarda las herramientas en la oficina
+ES	polite request	Por favor, guarda las llaves en la base
+ES	polite request	Por favor, trae la grúa
+ES	polite request	Por favor, guarda los lentes en la oficina
+ES	polite request	Por favor, guarda los pernos cerca del portón
+ES	polite request	Por favor, guarda las llaves en la oficina
+ES	polite request	Por favor, trae la llave inglesa
+ES	polite request	Por favor, guarda los cables en el almacén
+ES	polite request	Por favor, guarda los pernos en la torre
+ES	polite request	Por favor, guarda las llaves en la obra
+ES	short command	Limpia las botas
+ES	short command	Baja el generador
+ES	short command	Limpia los guantes
+ES	short command	Guarda las cuerdas
+ES	short command	Trae el generador
+ES	short command	Revisa la camioneta
+ES	short command	Limpia las llaves
+ES	short command	Limpia las tuercas
+ES	short command	Revisa la llave inglesa
+ES	short command	Revisa el martillo
+ES	short command	Trae el tornillo grande
+ES	short command	Baja el cable
+ES	short command	Revisa el arnés
+ES	short command	Trae el cable
+ES	short command	Revisa el taladro
+ES	short command	Trae la camioneta
+ES	short command	Trae la escalera
+ES	short command	Revisa el cable
+ES	short command	Baja el nivel
+ES	short command	Revisa la radio
+ES	negative	No toques el generador
+ES	negative	El electricista no viene a las ocho
+ES	negative	Pedro no viene el lunes
+ES	negative	No encuentro la grúa
+ES	negative	El chofer no viene el viernes
+ES	negative	El capataz no viene la próxima semana
+ES	negative	No toques la grúa
+ES	negative	El electricista no viene esta noche
+ES	negative	No tenemos los guantes
+ES	negative	Mi compañero no viene a las tres
+ES	negative	Juan no viene el lunes
+ES	negative	Juan no viene a las ocho
+ES	negative	El capataz no viene el lunes
+ES	negative	Mi hermano no viene a las ocho
+ES	negative	El capataz no viene esta noche
+ES	negative	Mi hermano no viene esta tarde
+ES	negative	No toques la radio
+ES	negative	Pedro no viene esta noche
+ES	negative	Mi compañero no viene esta tarde
+ES	negative	No tenemos las botas
+ES	numbers in words	Faltan cien tablas
+ES	numbers in words	Faltan diez metros de cuerda
+ES	numbers in words	Necesitamos cincuenta cables
+ES	numbers in words	Necesitamos dos tablas
+ES	numbers in words	Faltan diez tornillos
+ES	numbers in words	Necesitamos veinte bolsas de cemento
+ES	numbers in words	Necesitamos cuatro tornillos
+ES	numbers in words	Faltan cinco pernos
+ES	numbers in words	Necesitamos cuatro metros de cuerda
+ES	numbers in words	Necesitamos cuatro botellas de agua
+ES	numbers in words	Necesitamos doce tablas
+ES	numbers in words	Faltan cinco tablas
+ES	numbers in words	Necesitamos seis pernos
+ES	numbers in words	Necesitamos tres tablas
+ES	numbers in words	Faltan cuatro botellas de agua
+ES	numbers in words	Necesitamos cincuenta metros de cuerda
+ES	numbers in words	Necesitamos doce pernos
+ES	numbers in words	Necesitamos cinco guantes
+ES	numbers in words	Faltan diez tablas
+ES	numbers in words	Faltan cuatro trabajadores
+ES	times and days	La reunión es esta noche
+ES	times and days	El camión llega hoy
+ES	times and days	La reunión es esta tarde
+ES	times and days	Empezamos esta tarde
+ES	times and days	Empezamos en una hora
+ES	times and days	La reunión es el viernes
+ES	times and days	El camión llega el lunes
+ES	times and days	Empezamos esta noche
+ES	times and days	El camión llega esta tarde
+ES	times and days	La reunión es hoy
+ES	times and days	Empezamos a las tres
+ES	times and days	La reunión es a las tres
+ES	times and days	El camión llega el viernes
+ES	times and days	La reunión es mañana
+ES	times and days	La reunión es el lunes
+ES	times and days	El camión llega a las ocho
+ES	times and days	La reunión es a las ocho
+ES	times and days	Empezamos la próxima semana
+ES	times and days	Empezamos el viernes
+ES	times and days	El camión llega esta noche
+ES	names and cities	Pedro vive en Lima
+ES	names and cities	Vamos a Madrid la próxima semana
+ES	names and cities	Vamos a El Paso esta noche
+ES	names and cities	Ana vive en El Paso
+ES	names and cities	Vamos a Lima mañana
+ES	names and cities	Jorge vive en Monterrey
+ES	names and cities	Miguel vive en Lima
+ES	names and cities	Vamos a Madrid el lunes
+ES	names and cities	Abhishek vive en Guadalajara
+ES	names and cities	Lucía vive en Lima
+ES	names and cities	Abhishek vive en San Antonio
+ES	names and cities	Jorge vive en Guadalajara
+ES	names and cities	Pedro vive en Houston
+ES	names and cities	Ana vive en Bogotá
+ES	names and cities	Vamos a Querétaro mañana
+ES	names and cities	Elena vive en Bogotá
+ES	names and cities	Vamos a Bogotá esta noche
+ES	names and cities	Lucía vive en Houston
+ES	names and cities	Vamos a El Paso a las ocho
+ES	names and cities	Vamos a Querétaro la próxima semana
+ES	weather	Hoy hace mucho calor en la torre
+ES	weather	Hoy hace sol en el hotel
+ES	weather	Hay mucha niebla abajo
+ES	weather	Hoy hace mucho viento en la torre
+ES	weather	Hoy hace buen tiempo cerca del portón
+ES	weather	Va a llover el lunes
+ES	weather	Hoy hace mucho calor cerca del portón
+ES	weather	Hoy hace buen tiempo en la obra
+ES	weather	Hoy hace mucho viento abajo
+ES	weather	Hay mucha niebla en el almacén
+ES	weather	Hoy hace mucho calor en el hotel
+ES	weather	Hoy hace mucho calor en la obra
+ES	weather	Hoy hace sol en la torre
+ES	weather	Hoy hace mucho viento en la oficina
+ES	weather	Hoy hace mucho frío en la torre
+ES	weather	Hoy hace mucho calor en la oficina
+ES	weather	Hay mucha niebla en la obra
+ES	weather	Hoy hace mucho viento arriba
+ES	weather	Va a llover a las tres
+ES	weather	Hoy hace buen tiempo en la oficina
+ES	safety	Cuidado con la cuerda
+ES	safety	No te pares debajo de el arnés
+ES	safety	Cuidado con el martillo
+ES	safety	Cuidado con el tornillo grande
+ES	safety	No te pares debajo de la cinta métrica
+ES	safety	Cuidado con la escalera
+ES	safety	No te pares debajo de la escalera
+ES	safety	No te pares debajo de el martillo
+ES	safety	Revisa las botas otra vez
+ES	safety	No te pares debajo de el cable
+ES	safety	Cuidado con la grúa
+ES	safety	Ponte las botas antes de subir
+ES	safety	No te pares debajo de la radio
+ES	safety	No te pares debajo de la cuerda
+ES	safety	No te pares debajo de el generador
+ES	safety	Ponte los guantes antes de subir
+ES	safety	No te pares debajo de el tornillo grande
+ES	safety	Ponte los lentes antes de subir
+ES	safety	Cuidado con el nivel
+ES	safety	No te pares debajo de la llave inglesa
+ES	tools and materials	Necesito la cuerda abajo
+ES	tools and materials	Necesito la camioneta en la oficina
+ES	tools and materials	Necesito la camioneta en la base
+ES	tools and materials	¿Quién tiene el martillo?
+ES	tools and materials	Necesito el casco en el almacén
+ES	tools and materials	¿Quién tiene la grúa?
+ES	tools and materials	Necesito el tornillo grande en el almacén
+ES	tools and materials	Necesito la escalera en la base
+ES	tools and materials	Necesito el taladro en el almacén
+ES	tools and materials	¿Quién tiene el arnés?
+ES	tools and materials	Necesito el cable en el hotel
+ES	tools and materials	Necesito la radio cerca del portón
+ES	tools and materials	Se rompió la camioneta
+ES	tools and materials	¿Quién tiene el tornillo grande?
+ES	tools and materials	Necesito el taladro en el hotel
+ES	tools and materials	Necesito la cinta métrica arriba
+ES	tools and materials	Necesito el generador en el hotel
+ES	tools and materials	Necesito la llave inglesa en la obra
+ES	tools and materials	Necesito el martillo arriba
+ES	tools and materials	Necesito la radio en la base
+ES	health	El electricista se siente mal hoy
+ES	health	María se siente mal hoy
+ES	health	Me duele el pie
+ES	health	Estoy muy preocupado
+ES	health	Me duele el brazo
+ES	health	Me duele la espalda
+ES	health	Mi hermano se siente mal hoy
+ES	health	Estoy muy cansada
+ES	health	El supervisor se siente mal hoy
+ES	health	Me duele la rodilla
+ES	health	Me duele la mano
+ES	health	Estoy muy cansado
+ES	health	Estoy muy enfermo
+ES	health	Pedro se siente mal hoy
+ES	health	El capataz se siente mal hoy
+ES	health	Estoy muy mareado
+ES	health	Estoy muy contento
+ES	health	La ingeniera se siente mal hoy
+ES	health	Me duele la cabeza
+ES	health	Mi compañero se siente mal hoy
+ES	family	Mi esposa cumple años la próxima semana
+ES	family	Mi madre vive en Madrid
+ES	family	Mi hija cumple años esta noche
+ES	family	Mi hermana vive en Lima
+ES	family	Mi tío cumple años el viernes
+ES	family	Mi abuela cumple años el lunes
+ES	family	Mi hija vive en Bogotá
+ES	family	Mi hijo vive en Los Ángeles
+ES	family	Mi abuela cumple años hoy
+ES	family	Mi tío vive en Monterrey
+ES	family	Mi hermana cumple años hoy
+ES	family	Mi hija vive en Monterrey
+ES	family	Mi madre vive en Monterrey
+ES	family	Mi hija cumple años en una hora
+ES	family	Mi padre vive en Madrid
+ES	family	Mi hija cumple años la próxima semana
+ES	family	Mi padre vive en Los Ángeles
+ES	family	Mi abuela vive en Houston
+ES	family	Mi esposa cumple años a las ocho
+ES	family	Mi tío cumple años a las ocho
+ES	food and drink	Hoy comemos sopa de verduras
+ES	food and drink	Me gusta huevos con jamón
+ES	food and drink	Me gusta frijoles con tortillas
+ES	food and drink	Hoy comemos huevos con jamón
+ES	food and drink	Hoy comemos pollo con arroz
+ES	food and drink	Hoy comemos frijoles con tortillas
+ES	food and drink	Me gusta pasta con queso
+ES	food and drink	¿Quieres café?
+ES	food and drink	Hoy comemos pescado frito
+ES	food and drink	Me gusta tacos de carne
+ES	food and drink	Hoy comemos tacos de carne
+ES	food and drink	Hoy comemos enchiladas verdes
+ES	food and drink	¿Quieres un refresco?
+ES	food and drink	Me gusta sopa de verduras
+ES	food and drink	Me gusta pescado frito
+ES	food and drink	¿Quieres jugo de naranja?
+ES	food and drink	Me gusta enchiladas verdes
+ES	food and drink	Me gusta pollo con arroz
+ES	food and drink	Hoy comemos pasta con queso
+ES	food and drink	¿Quieres té caliente?
+ES	money	Me deben cuatro días de pago
+ES	money	Me deben diez días de pago
+ES	money	¿Cuánto cuesta la gasolina?
+ES	money	El pago llega la próxima semana
+ES	money	¿Cuánto cuesta el boleto?
+ES	money	El pago llega el lunes
+ES	money	Me deben seis días de pago
+ES	money	Me deben cien días de pago
+ES	money	El pago llega a las ocho
+ES	money	Me deben dos días de pago
+ES	money	Me deben cinco días de pago
+ES	money	¿Cuánto cuesta el hotel?
+ES	money	El pago llega a las tres
+ES	money	Me deben tres días de pago
+ES	money	El pago llega esta noche
+ES	money	Me deben cincuenta días de pago
+ES	money	El pago llega mañana
+ES	money	El pago llega el viernes
+ES	money	¿Cuánto cuesta el arnés nuevo?
+ES	money	El pago llega esta tarde
+ES	transport	El autobús sale el lunes
+ES	transport	Vamos en tren el viernes
+ES	transport	Vamos en camioneta en una hora
+ES	transport	Vamos en coche el viernes
+ES	transport	El autobús sale en una hora
+ES	transport	Vamos en taxi a las ocho
+ES	transport	Vamos en avión en una hora
+ES	transport	Vamos en coche a las ocho
+ES	transport	Vamos en autobús el lunes
+ES	transport	El autobús sale el viernes
+ES	transport	Vamos en camioneta la próxima semana
+ES	transport	Vamos en autobús esta noche
+ES	transport	Vamos en tren hoy
+ES	transport	Vamos en coche la próxima semana
+ES	transport	Vamos en camioneta a las ocho
+ES	transport	Vamos en avión a las tres
+ES	transport	Vamos en avión esta tarde
+ES	transport	Vamos en coche esta noche
+ES	transport	Vamos en camioneta hoy
+ES	transport	Vamos en camioneta esta tarde
+ES	long sentence	Mi compañero dijo que el camión llega tarde, pero todo va bien
+ES	long sentence	Juan dijo que faltan los pernos, pero hay que avisar al jefe
+ES	long sentence	Mi compañero dijo que el camión llega tarde, pero necesitamos más gente
+ES	long sentence	El supervisor dijo que el camión llega tarde, pero podemos empezar mañana
+ES	long sentence	María dijo que faltan los pernos, pero todo va bien
+ES	long sentence	El chofer dijo que la torre está lista, pero necesitamos más gente
+ES	long sentence	El electricista dijo que el camión llega tarde, pero podemos empezar mañana
+ES	long sentence	Pedro dijo que faltan los pernos, pero vamos a esperar
+ES	long sentence	El capataz dijo que la grúa no funciona, pero todo va bien
+ES	long sentence	María dijo que hace mucho viento, pero hay que avisar al jefe
+ES	long sentence	El supervisor dijo que el camión llega tarde, pero necesitamos más gente
+ES	long sentence	Juan dijo que hace mucho viento, pero vamos a esperar
+ES	long sentence	Mi compañero dijo que la torre está lista, pero todo va bien
+ES	long sentence	El chofer dijo que la torre está lista, pero todo va bien
+ES	long sentence	Mi compañero dijo que la torre está lista, pero hay que avisar al jefe
+ES	long sentence	El capataz dijo que hace mucho viento, pero podemos empezar mañana
+ES	long sentence	Juan dijo que la grúa no funciona, pero podemos empezar mañana
+ES	long sentence	El capataz dijo que el camión llega tarde, pero vamos a esperar
+ES	long sentence	Mi hermano dijo que faltan los pernos, pero hay que avisar al jefe
+ES	long sentence	Mi compañero dijo que el camión llega tarde, pero podemos empezar mañana
+ES	numbers in digits	El camión 64 llega a las tres
+ES	numbers in digits	El camión 81 llega en una hora
+ES	numbers in digits	El camión 27 llega la próxima semana
+ES	numbers in digits	El camión 48 llega a las ocho
+ES	numbers in digits	Necesitamos 81 metros de cable
+ES	numbers in digits	El camión 12 llega el lunes
+ES	numbers in digits	La torre 27 está lista
+ES	numbers in digits	El camión 103 llega el viernes
+ES	numbers in digits	El camión 56 llega esta noche
+ES	numbers in digits	El camión 7 llega esta noche
+ES	numbers in digits	El camión 103 llega a las tres
+ES	numbers in digits	El camión 7 llega en una hora
+ES	numbers in digits	El camión 12 llega el viernes
+ES	numbers in digits	El camión 48 llega la próxima semana
+ES	numbers in digits	El camión 81 llega a las tres
+ES	numbers in digits	El camión 81 llega a las ocho
+ES	numbers in digits	El camión 48 llega el viernes
+ES	numbers in digits	Necesitamos 64 metros de cable
+ES	numbers in digits	El camión 7 llega a las ocho
+ES	numbers in digits	El camión 12 llega a las tres
+ES	greeting	Adiós Abhishek, nos vemos el viernes
+ES	greeting	Adiós Lucía, nos vemos mañana
+ES	greeting	Adiós Pedro, nos vemos el lunes
+ES	greeting	Adiós Ana, nos vemos a las tres
+ES	greeting	Adiós Lucía, nos vemos la próxima semana
+ES	greeting	Adiós Elena, nos vemos el lunes
+ES	greeting	Buenas tardes, Carlos
+ES	greeting	Adiós Pedro, nos vemos hoy
+ES	greeting	Adiós Elena, nos vemos hoy
+ES	greeting	Adiós Miguel, nos vemos el lunes
+ES	greeting	Buenas tardes, Elena
+ES	greeting	Adiós Abhishek, nos vemos esta tarde
+ES	greeting	Adiós Sofía, nos vemos esta noche
+ES	greeting	Adiós Abhishek, nos vemos en una hora
+ES	greeting	Adiós Carlos, nos vemos mañana
+ES	greeting	Hola Elena, ¿cómo estás?
+ES	greeting	Adiós Elena, nos vemos en una hora
+ES	greeting	Adiós Pedro, nos vemos a las ocho
+ES	greeting	Adiós Pedro, nos vemos en una hora
+ES	greeting	Adiós Elena, nos vemos esta noche
+ES	thanks and sorry	Perdón, Raúl, no te escuché
+ES	thanks and sorry	Perdón, Pedro, no te escuché
+ES	thanks and sorry	Perdón, Sofía, se me olvidó
+ES	thanks and sorry	Perdón, Jorge, se me olvidó
+ES	thanks and sorry	Perdón, Abhishek, no te escuché
+ES	thanks and sorry	Perdón, Ana, me equivoqué
+ES	thanks and sorry	Perdón, Abhishek, no lo sabía
+ES	thanks and sorry	Perdón, Raúl, se me olvidó
+ES	thanks and sorry	Perdón, Carlos, me equivoqué
+ES	thanks and sorry	Perdón, Lucía, se me olvidó
+ES	thanks and sorry	Perdón, Abhishek, se me olvidó
+ES	thanks and sorry	Perdón, Abhishek, me equivoqué
+ES	thanks and sorry	Perdón, Sofía, me equivoqué
+ES	thanks and sorry	Perdón, Pedro, me equivoqué
+ES	thanks and sorry	Gracias por todo
+ES	thanks and sorry	Perdón, Pedro, se me olvidó
+ES	thanks and sorry	Perdón, Jorge, no te escuché
+ES	thanks and sorry	Gracias por la ayuda
+ES	thanks and sorry	Perdón, Raúl, no lo sabía
+ES	thanks and sorry	Perdón, Lucía, me equivoqué
+ES	short reply	Sí, claro
+ES	short reply	Muchas gracias
+ES	short reply	De nada
+ES	short reply	Está bien
+ES	short reply	Ya voy
+ES	short reply	Un momento
+ES	short reply	Buenos días
+ES	short reply	Buenas noches
+ES	short reply	Hasta mañana
+ES	short reply	Con permiso
+ES	short reply	Perdón
+ES	short reply	Claro que sí
+ES	short reply	No sé
+ES	short reply	Tal vez
+ES	short reply	Ahorita voy
+ES	short reply	Qué bueno
+ES	short reply	Me parece bien
+ES	short reply	Por supuesto
+ES	short reply	Vale
+ES	short reply	Todo bien
+EN	statement now	My brother needs the cable
+EN	statement now	John works in the truck
+EN	statement now	We always leave the insulators in the warehouse
+EN	statement now	The driver works up there
+EN	statement now	We always leave the nuts at the site
+EN	statement now	My partner has the cables
+EN	statement now	Pedro needs the big bolt
+EN	statement now	John needs the crane
+EN	statement now	The electrician needs the level
+EN	statement now	The supervisor needs the tape measure
+EN	statement now	John works in the office
+EN	statement now	Pedro works down here
+EN	statement now	My brother needs the wrench
+EN	statement now	The electrician has the tools
+EN	statement now	We always leave the nuts at the hotel
+EN	statement now	The foreman works down here
+EN	statement now	We always leave the ropes near the gate
+EN	statement now	My brother needs the tape measure
+EN	statement now	My partner works at the base
+EN	statement now	My partner works at the hotel
+EN	statement past	Yesterday the foreman left the helmet in the warehouse
+EN	statement past	Yesterday the supervisor left the rope up there
+EN	statement past	Yesterday the supervisor left the big bolt at the hotel
+EN	statement past	Yesterday John left the wrench near the gate
+EN	statement past	Yesterday the engineer left the generator at the hotel
+EN	statement past	Yesterday my partner left the helmet down here
+EN	statement past	I forgot the van at the hotel
+EN	statement past	Yesterday the driver left the van near the gate
+EN	statement past	Yesterday the foreman left the helmet down here
+EN	statement past	Yesterday Maria left the cable on the tower
+EN	statement past	Yesterday my partner left the van on the tower
+EN	statement past	Yesterday the engineer left the van at the base
+EN	statement past	Yesterday Maria left the level down here
+EN	statement past	Yesterday the supervisor left the hammer near the gate
+EN	statement past	Yesterday the foreman left the hammer in the office
+EN	statement past	Yesterday the foreman left the hammer in the warehouse
+EN	statement past	Yesterday my partner left the hammer at the base
+EN	statement past	Yesterday the foreman left the drill up there
+EN	statement past	Yesterday Maria left the van at the site
+EN	statement past	Yesterday my brother left the hammer at the hotel
+EN	statement future	The foreman is going to paint the level tonight
+EN	statement future	My brother is going to change the tape measure on Friday
+EN	statement future	My partner is going to change the wrench tonight
+EN	statement future	My partner is going to store the hammer tonight
+EN	statement future	My brother is going to lift the radio next week
+EN	statement future	The supervisor is going to clean the generator tomorrow
+EN	statement future	Pedro is going to lift the level this afternoon
+EN	statement future	We are going to bring the boots tomorrow
+EN	statement future	The supervisor is going to clean the big bolt this afternoon
+EN	statement future	Pedro is going to lower the cable in an hour
+EN	statement future	The engineer is going to move the harness at three
+EN	statement future	The driver is going to measure the generator at eight
+EN	statement future	My partner is going to bring the generator this afternoon
+EN	statement future	John is going to bring the helmet tomorrow
+EN	statement future	The electrician is going to change the wrench on Monday
+EN	statement future	The supervisor is going to change the drill in an hour
+EN	statement future	Pedro is going to bring the crane today
+EN	statement future	The foreman is going to change the generator tonight
+EN	statement future	The engineer is going to store the ladder this afternoon
+EN	statement future	My partner is going to move the level in an hour
+EN	question where	Where is the cable?
+EN	question where	Where is the hammer?
+EN	question where	Where is Pedro?
+EN	question where	Where are the boots?
+EN	question where	Where is the engineer?
+EN	question where	Where is the harness?
+EN	question where	Where is the rope?
+EN	question where	Where is the van?
+EN	question where	Where is the ladder?
+EN	question where	Where is the tape measure?
+EN	question where	Where is the generator?
+EN	question where	Where are the glasses?
+EN	question where	Where is my brother?
+EN	question where	Where is the driver?
+EN	question where	Where is the wrench?
+EN	question where	Where is the foreman?
+EN	question where	Where is the crane?
+EN	question where	Where is John?
+EN	question where	Where is the supervisor?
+EN	question where	Where are the ropes?
+EN	question when	When are we going to lower the keys?
+EN	question when	What time does the electrician arrive?
+EN	question when	When are we going to measure the bolts?
+EN	question when	When are we going to change the keys?
+EN	question when	When are we going to change the boots?
+EN	question when	When are we going to bring the glasses?
+EN	question when	When are we going to store the insulators?
+EN	question when	When are we going to move the tools?
+EN	question when	When are we going to lower the ropes?
+EN	question when	When are we going to bring the gloves?
+EN	question when	When are we going to lower the glasses?
+EN	question when	When are we going to check the tools?
+EN	question when	When are we going to change the ropes?
+EN	question when	When are we going to check the nuts?
+EN	question when	When are we going to measure the ropes?
+EN	question when	When are we going to check the boots?
+EN	question when	What time does my brother arrive?
+EN	question when	When are we going to bring the ropes?
+EN	question when	When are we going to lower the tools?
+EN	question when	When are we going to check the gloves?
+EN	question yes/no	Is the foreman at the site?
+EN	question yes/no	Can you measure the rope?
+EN	question yes/no	Is Pedro at the hotel?
+EN	question yes/no	Can you change the harness?
+EN	question yes/no	Is the driver on the tower?
+EN	question yes/no	Do you have the rope?
+EN	question yes/no	Is the electrician down here?
+EN	question yes/no	Is the engineer near the gate?
+EN	question yes/no	Can you lower the level?
+EN	question yes/no	Can you check the level?
+EN	question yes/no	Is Maria down here?
+EN	question yes/no	Is my partner in the truck?
+EN	question yes/no	Can you move the hammer?
+EN	question yes/no	Can you paint the hammer?
+EN	question yes/no	Can you move the generator?
+EN	question yes/no	Is the foreman in the office?
+EN	question yes/no	Can you check the rope?
+EN	question yes/no	Is Pedro at the site?
+EN	question yes/no	Is Pedro in the truck?
+EN	question yes/no	Is Pedro at the base?
+EN	polite request	Please bring the hammer
+EN	polite request	Please put the tools near the gate
+EN	polite request	Please put the ropes on the tower
+EN	polite request	Please put the boots at the base
+EN	polite request	Please put the tools in the warehouse
+EN	polite request	Can you pass me the ladder, please?
+EN	polite request	Please put the bolts at the site
+EN	polite request	Please put the gloves in the warehouse
+EN	polite request	Please put the cables in the truck
+EN	polite request	Please put the insulators at the base
+EN	polite request	Please put the tools down here
+EN	polite request	Please put the boots in the warehouse
+EN	polite request	Please bring the wrench
+EN	polite request	Please put the insulators down here
+EN	polite request	Please put the nuts in the office
+EN	polite request	Please put the gloves down here
+EN	polite request	Please put the cables in the warehouse
+EN	polite request	Please put the tools at the hotel
+EN	polite request	Please put the ropes in the office
+EN	polite request	Please put the cables at the base
+EN	short command	Lower the drill
+EN	short command	Lower the wrench
+EN	short command	Lower the radio
+EN	short command	Bring the cable
+EN	short command	Lower the level
+EN	short command	Bring the hammer
+EN	short command	Bring the drill
+EN	short command	Check the rope
+EN	short command	Store the glasses
+EN	short command	Bring the wrench
+EN	short command	Check the helmet
+EN	short command	Clean the cables
+EN	short command	Check the drill
+EN	short command	Check the harness
+EN	short command	Store the keys
+EN	short command	Bring the harness
+EN	short command	Store the insulators
+EN	short command	Clean the nuts
+EN	short command	Store the bolts
+EN	short command	Store the cables
+EN	negative	We don't have the tools
+EN	negative	Pedro is not coming next week
+EN	negative	The driver is not coming at three
+EN	negative	The electrician is not coming tomorrow
+EN	negative	We don't have the boots
+EN	negative	Don't touch the radio
+EN	negative	The driver is not coming in an hour
+EN	negative	The driver is not coming on Monday
+EN	negative	The supervisor is not coming tomorrow
+EN	negative	My partner is not coming next week
+EN	negative	Don't touch the cable
+EN	negative	The foreman is not coming in an hour
+EN	negative	I can't find the helmet
+EN	negative	My partner is not coming in an hour
+EN	negative	Don't touch the wrench
+EN	negative	My brother is not coming on Friday
+EN	negative	I can't find the wrench
+EN	negative	I can't find the level
+EN	negative	Maria is not coming on Monday
+EN	negative	I can't find the big bolt
+EN	numbers in words	We need twelve boards
+EN	numbers in words	We are missing four gloves
+EN	numbers in words	We need five meters of rope
+EN	numbers in words	We need twenty meters of rope
+EN	numbers in words	We need three meters of rope
+EN	numbers in words	We need two screws
+EN	numbers in words	We need twenty bags of cement
+EN	numbers in words	We need five bottles of water
+EN	numbers in words	We are missing four meters of rope
+EN	numbers in words	We are missing twelve bolts
+EN	numbers in words	We need a hundred bags of cement
+EN	numbers in words	We need five workers
+EN	numbers in words	We are missing four bags of cement
+EN	numbers in words	We need twenty gloves
+EN	numbers in words	We need six boards
+EN	numbers in words	We are missing fifty screws
+EN	numbers in words	We are missing ten boards
+EN	numbers in words	We are missing a hundred gloves
+EN	numbers in words	We are missing twenty bolts
+EN	numbers in words	We are missing six workers
+EN	times and days	The truck arrives at three
+EN	times and days	The meeting is today
+EN	times and days	We start in an hour
+EN	times and days	The truck arrives next week
+EN	times and days	The truck arrives this afternoon
+EN	times and days	The truck arrives at eight
+EN	times and days	The meeting is at three
+EN	times and days	The meeting is tomorrow
+EN	times and days	The meeting is at eight
+EN	times and days	We start tomorrow
+EN	times and days	We start on Monday
+EN	times and days	We start on Friday
+EN	times and days	The truck arrives tonight
+EN	times and days	The meeting is next week
+EN	times and days	The meeting is this afternoon
+EN	times and days	The truck arrives in an hour
+EN	times and days	The truck arrives today
+EN	times and days	We start this afternoon
+EN	times and days	The meeting is tonight
+EN	times and days	We start at three
+EN	names and cities	Helen lives in Los Angeles
+EN	names and cities	Abhishek lives in Dallas
+EN	names and cities	We are going to Los Angeles tonight
+EN	names and cities	We are going to San Diego on Monday
+EN	names and cities	We are going to Seattle tonight
+EN	names and cities	Peter lives in El Paso
+EN	names and cities	We are going to Phoenix tomorrow
+EN	names and cities	Ralph lives in Chicago
+EN	names and cities	We are going to Phoenix this afternoon
+EN	names and cities	Anna lives in Los Angeles
+EN	names and cities	We are going to Phoenix on Friday
+EN	names and cities	We are going to Detroit next week
+EN	names and cities	Anna lives in Dallas
+EN	names and cities	Michael lives in Houston
+EN	names and cities	Anna lives in Seattle
+EN	names and cities	We are going to Houston in an hour
+EN	names and cities	Helen lives in Houston
+EN	names and cities	We are going to Dallas in an hour
+EN	names and cities	We are going to San Diego next week
+EN	names and cities	We are going to Denver on Friday
+EN	weather	It is very windy in the truck
+EN	weather	It is going to rain on Monday
+EN	weather	It is very cold in the office
+EN	weather	It is very hot at the hotel
+EN	weather	It is very sunny at the site
+EN	weather	It is very hot down here
+EN	weather	It is very hot up there
+EN	weather	It is very cold up there
+EN	weather	It is going to rain this afternoon
+EN	weather	There is a lot of fog in the truck
+EN	weather	It is very foggy up there
+EN	weather	It is very foggy at the site
+EN	weather	There is a lot of fog in the warehouse
+EN	weather	It is very windy at the base
+EN	weather	It is going to rain tomorrow
+EN	weather	It is very sunny up there
+EN	weather	It is going to rain next week
+EN	weather	There is a lot of fog at the base
+EN	weather	There is a lot of fog on the tower
+EN	weather	It is very foggy in the office
+EN	safety	Put on your gloves before climbing
+EN	safety	Be careful with the rope
+EN	safety	Do not stand under the harness
+EN	safety	Be careful with the wrench
+EN	safety	Be careful with the level
+EN	safety	Check your glasses again
+EN	safety	Do not stand under the big bolt
+EN	safety	Be careful with the ladder
+EN	safety	Do not stand under the generator
+EN	safety	Be careful with the hammer
+EN	safety	Do not stand under the rope
+EN	safety	Be careful with the drill
+EN	safety	Do not stand under the tape measure
+EN	safety	Be careful with the crane
+EN	safety	Be careful with the generator
+EN	safety	Do not stand under the crane
+EN	safety	Do not stand under the hammer
+EN	safety	Do not stand under the ladder
+EN	safety	Be careful with the big bolt
+EN	safety	Put on your boots before climbing
+EN	tools and materials	I need the drill in the warehouse
+EN	tools and materials	I need the hammer down here
+EN	tools and materials	The level broke
+EN	tools and materials	I need the generator at the hotel
+EN	tools and materials	I need the crane in the warehouse
+EN	tools and materials	I need the tape measure in the office
+EN	tools and materials	I need the ladder in the warehouse
+EN	tools and materials	Who has the cable?
+EN	tools and materials	I need the wrench in the truck
+EN	tools and materials	The tape measure broke
+EN	tools and materials	I need the van in the warehouse
+EN	tools and materials	Who has the crane?
+EN	tools and materials	I need the wrench down here
+EN	tools and materials	I need the level in the warehouse
+EN	tools and materials	I need the crane in the office
+EN	tools and materials	Who has the radio?
+EN	tools and materials	I need the rope on the tower
+EN	tools and materials	I need the big bolt at the hotel
+EN	tools and materials	I need the harness in the warehouse
+EN	tools and materials	I need the harness up there
+EN	health	My back hurts
+EN	health	My partner feels sick today
+EN	health	My hand hurts
+EN	health	My neck hurts
+EN	health	My foot hurts
+EN	health	The supervisor feels sick today
+EN	health	I am very sick
+EN	health	I am very dizzy
+EN	health	The foreman feels sick today
+EN	health	Pedro feels sick today
+EN	health	My head hurts
+EN	health	I am very tired
+EN	health	The engineer feels sick today
+EN	health	I am very cold
+EN	health	My knee hurts
+EN	health	I am very worried
+EN	health	The electrician feels sick today
+EN	health	John feels sick today
+EN	health	My brother feels sick today
+EN	health	I am very happy
+EN	family	My grandmother's birthday is this afternoon
+EN	family	My sister lives in Phoenix
+EN	family	My uncle lives in Houston
+EN	family	My son's birthday is at three
+EN	family	My uncle lives in Denver
+EN	family	My son lives in Chicago
+EN	family	My grandmother's birthday is on Monday
+EN	family	My mother lives in Houston
+EN	family	My mother lives in Seattle
+EN	family	My father lives in Chicago
+EN	family	My daughter's birthday is at eight
+EN	family	My mother's birthday is at eight
+EN	family	My father's birthday is next week
+EN	family	My mother's birthday is today
+EN	family	My mother lives in Los Angeles
+EN	family	My mother lives in Chicago
+EN	family	My son lives in Los Angeles
+EN	family	My grandmother's birthday is next week
+EN	family	My father lives in San Diego
+EN	family	My son's birthday is today
+EN	food and drink	I like fried fish
+EN	food and drink	I like pasta with cheese
+EN	food and drink	Today we eat chicken with rice
+EN	food and drink	Today we eat pasta with cheese
+EN	food and drink	Today we eat green enchiladas
+EN	food and drink	Today we eat beef tacos
+EN	food and drink	Today we eat beans with tortillas
+EN	food and drink	Do you want orange juice?
+EN	food and drink	I like beef tacos
+EN	food and drink	Do you want hot tea?
+EN	food and drink	I like green enchiladas
+EN	food and drink	I like chicken with rice
+EN	food and drink	Do you want a soda?
+EN	food and drink	I like beans with tortillas
+EN	food and drink	I like vegetable soup
+EN	food and drink	Do you want coffee?
+EN	food and drink	Today we eat fried fish
+EN	food and drink	I like eggs with ham
+EN	food and drink	Today we eat vegetable soup
+EN	food and drink	Do you want cold water?
+EN	money	They owe me six days of pay
+EN	money	The payment arrives tomorrow
+EN	money	How much is the new harness?
+EN	money	The payment arrives this afternoon
+EN	money	The payment arrives in an hour
+EN	money	How much is the hotel?
+EN	money	They owe me three days of pay
+EN	money	How much is the gas?
+EN	money	The payment arrives next week
+EN	money	The payment arrives today
+EN	money	They owe me twenty days of pay
+EN	money	They owe me fifty days of pay
+EN	money	They owe me two days of pay
+EN	money	They owe me twelve days of pay
+EN	money	They owe me ten days of pay
+EN	money	The payment arrives on Monday
+EN	money	They owe me four days of pay
+EN	money	The payment arrives on Friday
+EN	money	The payment arrives at three
+EN	money	How much is the taxi?
+EN	transport	We are going by taxi next week
+EN	transport	We are going by taxi in an hour
+EN	transport	We are going by car tomorrow
+EN	transport	The bus leaves this afternoon
+EN	transport	The bus leaves next week
+EN	transport	We are going by plane at three
+EN	transport	We are going by train on Friday
+EN	transport	We are going by taxi at eight
+EN	transport	We are going by car this afternoon
+EN	transport	We are going by bus at three
+EN	transport	We are going by plane tomorrow
+EN	transport	We are going by taxi this afternoon
+EN	transport	We are going by van in an hour
+EN	transport	The bus leaves on Friday
+EN	transport	We are going by van on Friday
+EN	transport	We are going by plane in an hour
+EN	transport	We are going by van this afternoon
+EN	transport	We are going by train tomorrow
+EN	transport	We are going by bus next week
+EN	transport	We are going by car at eight
+EN	long sentence	Pedro said that the crane is not working, but we need more people
+EN	long sentence	Maria said that the crane is not working, but we can start tomorrow
+EN	long sentence	John said that the tower is ready, but we are going to wait
+EN	long sentence	Maria said that the crane is not working, but we have to tell the boss
+EN	long sentence	Pedro said that the truck is late, but we have to tell the boss
+EN	long sentence	The foreman said that the truck is late, but we need more people
+EN	long sentence	The electrician said that it is very windy, but everything is fine
+EN	long sentence	John said that the bolts are missing, but we have to tell the boss
+EN	long sentence	John said that the truck is late, but we can start tomorrow
+EN	long sentence	Maria said that the tower is ready, but we have to tell the boss
+EN	long sentence	John said that it is very windy, but we have to tell the boss
+EN	long sentence	Pedro said that the crane is not working, but we can start tomorrow
+EN	long sentence	The foreman said that the crane is not working, but we need more people
+EN	long sentence	The electrician said that the bolts are missing, but we have to tell the boss
+EN	long sentence	The driver said that the truck is late, but we are going to wait
+EN	long sentence	The engineer said that the tower is ready, but we need more people
+EN	long sentence	The electrician said that the tower is ready, but we are going to wait
+EN	long sentence	Maria said that it is very windy, but everything is fine
+EN	long sentence	John said that the crane is not working, but everything is fine
+EN	long sentence	The electrician said that the truck is late, but we can start tomorrow
+EN	numbers in digits	Truck 48 arrives next week
+EN	numbers in digits	Truck 81 arrives today
+EN	numbers in digits	We need 35 meters of cable
+EN	numbers in digits	Truck 7 arrives next week
+EN	numbers in digits	Truck 64 arrives next week
+EN	numbers in digits	Truck 7 arrives on Friday
+EN	numbers in digits	Truck 103 arrives at eight
+EN	numbers in digits	Truck 81 arrives next week
+EN	numbers in digits	Tower 7 is ready
+EN	numbers in digits	Truck 12 arrives tonight
+EN	numbers in digits	Tower 27 is ready
+EN	numbers in digits	We need 48 meters of cable
+EN	numbers in digits	Truck 48 arrives tomorrow
+EN	numbers in digits	Truck 35 arrives today
+EN	numbers in digits	Truck 56 arrives in an hour
+EN	numbers in digits	Truck 90 arrives tomorrow
+EN	numbers in digits	We need 81 meters of cable
+EN	numbers in digits	Truck 35 arrives on Friday
+EN	numbers in digits	Truck 35 arrives at eight
+EN	numbers in digits	Truck 103 arrives this afternoon
+EN	greeting	Good afternoon, George
+EN	greeting	Bye Abhishek, see you on Friday
+EN	greeting	Bye Lucy, see you today
+EN	greeting	Bye Ralph, see you next week
+EN	greeting	Bye Abhishek, see you this afternoon
+EN	greeting	Bye Michael, see you tomorrow
+EN	greeting	Good afternoon, Charles
+EN	greeting	Bye Lucy, see you this afternoon
+EN	greeting	Bye George, see you next week
+EN	greeting	Bye Abhishek, see you at three
+EN	greeting	Bye Michael, see you today
+EN	greeting	Bye Charles, see you tonight
+EN	greeting	Bye Ralph, see you today
+EN	greeting	Bye George, see you on Friday
+EN	greeting	Good afternoon, Sophie
+EN	greeting	Hi Charles, how are you?
+EN	greeting	Hi Peter, how are you?
+EN	greeting	Bye Sophie, see you at eight
+EN	greeting	Bye Helen, see you on Friday
+EN	greeting	Bye Anna, see you tomorrow
+EN	thanks and sorry	Sorry, Anna, I forgot
+EN	thanks and sorry	Sorry, Ralph, I didn't know
+EN	thanks and sorry	Sorry, Michael, I forgot
+EN	thanks and sorry	Sorry, Abhishek, I made a mistake
+EN	thanks and sorry	Thanks for bringing the tools
+EN	thanks and sorry	Sorry, Michael, I didn't know
+EN	thanks and sorry	Sorry, Lucy, I didn't hear you
+EN	thanks and sorry	Sorry, Charles, I made a mistake
+EN	thanks and sorry	I'm sorry, I forgot
+EN	thanks and sorry	Sorry, Abhishek, I didn't hear you
+EN	thanks and sorry	Thanks for everything
+EN	thanks and sorry	Sorry, Anna, I didn't hear you
+EN	thanks and sorry	Sorry, Peter, I forgot
+EN	thanks and sorry	I'm sorry, I didn't know
+EN	thanks and sorry	Sorry, George, I made a mistake
+EN	thanks and sorry	Thanks for the help
+EN	thanks and sorry	I'm sorry, I didn't hear you
+EN	thanks and sorry	Sorry, Sophie, I didn't hear you
+EN	thanks and sorry	Sorry, Anna, I made a mistake
+EN	thanks and sorry	Sorry, Michael, I made a mistake
+EN	short reply	Yes, of course
+EN	short reply	Thank you very much
+EN	short reply	You're welcome
+EN	short reply	That's fine
+EN	short reply	I'm coming
+EN	short reply	One moment
+EN	short reply	Good morning
+EN	short reply	Good night
+EN	short reply	See you tomorrow
+EN	short reply	Excuse me
+EN	short reply	Sorry
+EN	short reply	Sure thing
+EN	short reply	I don't know
+EN	short reply	Maybe
+EN	short reply	On my way
+EN	short reply	That's great
+EN	short reply	Sounds good
+EN	short reply	Of course
+EN	short reply	Okay then
+EN	short reply	All good

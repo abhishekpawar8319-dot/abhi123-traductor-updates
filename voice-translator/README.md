@@ -85,5 +85,10 @@ Needs the Android SDK (`local.properties` → `sdk.dir`). The release is signed 
   offline pack, missing-pack handling in Auto mode, the offline recognizer request, offline voice choice, and a conversation
   where the internet drops mid-way and comes back (all 8 sentences translated and saved, no wait longer than 0.2 s).
 
-Version 1.4 result: all 239 tests passed on 3 separate full runs.
+- **Offline 1,000-sentence check** (`./run-offline-1000.sh`): 1,000 different sentences (500 Spanish, 500 English, 25 kinds
+  each, made by `tools/make_offline_sentences.py`), five checks each: direction offline, direction from the words alone,
+  no false alarms, one injected mistake caught, and the full offline flow (translated the right way, saved, in order).
+  Plus 330 sentences the detector was not tuned on. Latest report: `OFFLINE-1000-REPORT.txt`.
+
+Version 1.5 result: all 241 tests passed on 3 separate full runs; offline check 1000/1000 on every check, 330/330 held-out.
 The microphone, Google speech recognition and ML Kit translation only run on a real phone, so they still need a test on a device.
