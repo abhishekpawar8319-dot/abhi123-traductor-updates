@@ -63,7 +63,7 @@ object LanguageGuesser {
         "fog", "always", "already", "next", "last", "again", "before", "after", "under", "near", "up", "down",
         "office", "warehouse", "site", "tower", "gate", "boss", "people", "job", "meeting", "late", "missing",
         "ready", "broken", "new", "big", "small", "lot", "way", "sounds", "way", "of", "partner", "driver",
-        "engineer", "foreman", "supervisor", "electrician", "pay", "days", "day", "chicken", "rice", "beef",
+        "engineer", "foreman", "electrician", "pay", "days", "day", "chicken", "rice", "beef",
         "vegetable", "soup", "fried", "fish", "beans", "eggs", "ham", "cheese", "coffee", "juice", "orange", 
         "tea", "cement", "help", "waiting", "coming", "mistake", "hear", "heard", "made",
     )
@@ -95,6 +95,19 @@ object LanguageGuesser {
         return es to en
     }
 
+    /** Language only when the words clearly point to it (at least 2 more clues than the other language). */
+    fun clearly(text: String): Lang? {
+        val (es, en) = score(text)
+        return when {
+            es - en >= 2 -> Lang.ES
+            en - es >= 2 -> Lang.EN
+            else -> null
+        }
+    }
+
+    /** Everyday words of both languages (not names). */
+    fun commonWords(): Set<String> = spanish + english
+
     /** Spanish/English guess, or null when the text gives no clear signal. */
     fun guess(text: String): Lang? {
         val (es, en) = score(text)
@@ -115,7 +128,7 @@ object DirectionDecider {
     fun sourceOf(text: String, mode: ListenMode, detected: Lang?, listening: Lang): Lang = when (mode) {
         ListenMode.SPANISH -> Lang.ES
         ListenMode.ENGLISH -> Lang.EN
-        ListenMode.AUTO -> {
+        ListenMode.AUTO, ListenMode.MIXED_ES -> {
             val guess = LanguageGuesser.guess(text)
             val (es, en) = LanguageGuesser.score(text)
             val strongGuess = guess != null && kotlin.math.abs(es - en) >= 2

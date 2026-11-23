@@ -71,7 +71,24 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
     @SuppressLint("NotifyDataSetChanged")
     fun setAll(list: List<TranslationRecord>) { items.clear(); items.addAll(list); notifyDataSetChanged() }
 
-    fun addTop(r: TranslationRecord) { items.add(0, r); notifyItemInserted(0) }
+    /** Newest first; keeps the screen light during long conversations (everything stays saved in History). */
+    fun addTop(r: TranslationRecord) {
+        items.add(0, r)
+        notifyItemInserted(0)
+        if (items.size > MAX_ON_SCREEN) {
+            val extra = items.size - MAX_ON_SCREEN
+            repeat(extra) { items.removeAt(items.size - 1) }
+            notifyItemRangeRemoved(MAX_ON_SCREEN, extra)
+        }
+    }
+
+    /** Puts the finished translation in place, or adds the sentence if it is not on screen yet. */
+    fun upsert(r: TranslationRecord) {
+        val i = items.indexOfFirst { it.id == r.id }
+        if (i >= 0) { items[i] = r; notifyItemChanged(i) } else addTop(r)
+    }
+
+    companion object { const val MAX_ON_SCREEN = 300 }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         VH(LayoutInflater.from(parent.context).inflate(R.layout.item_translation, parent, false))
@@ -90,9 +107,19 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
         h.fix.text = if (doubtful) "⚠✏️" else "✏️"
         h.fix.setOnClickListener { onFix?.invoke(r) }
         h.original.setOnClickListener { onFix?.invoke(r) }
-        h.translated.text = r.translated.ifBlank { h.itemView.context.getString(R.string.not_translated) }
+        val ctx = h.itemView.context
+        h.translated.text = when (r.status) {
+            com.abhi.vozconversa.core.TStatus.PENDING -> ctx.getString(R.string.translating)
+            com.abhi.vozconversa.core.TStatus.FAILED -> ctx.getString(R.string.translate_later)
+            com.abhi.vozconversa.core.TStatus.NOT_NEEDED -> r.original
+            com.abhi.vozconversa.core.TStatus.DONE -> r.translated.ifBlank { ctx.getString(R.string.not_translated) }
+        }
+        h.translated.alpha = if (r.status == com.abhi.vozconversa.core.TStatus.DONE || r.status == com.abhi.vozconversa.core.TStatus.NOT_NEEDED) 1f else 0.6f
+        if (r.status == com.abhi.vozconversa.core.TStatus.NOT_NEEDED) {
+            h.tag.text = ctx.getString(R.string.already_english) + " · " + time.format(Date(r.timeMillis))
+        }
         h.itemView.setOnLongClickListener { onLongPress?.invoke(r); onLongPress != null }
-        h.play.visibility = if (r.translated.isBlank()) View.INVISIBLE else View.VISIBLE
+        h.play.visibility = if (r.translated.isBlank() || r.status != com.abhi.vozconversa.core.TStatus.DONE) View.INVISIBLE else View.VISIBLE
         h.play.setOnClickListener { onPlay?.invoke(r) }
     }
 }
@@ -123,10 +150,13 @@ class MainActivity : AppCompatActivity() {
             is LiveBus.Event.Status -> showStatus(e)
             is LiveBus.Event.Partial -> partial.text = e.text
             is LiveBus.Event.Speaker -> showSpeaker()
-            is LiveBus.Event.Translated -> {
-                adapter.addTop(e.record)
-                findViewById<RecyclerView>(R.id.list).scrollToPosition(0)
+            is LiveBus.Event.Captured -> {
+                adapter.upsert(e.record)
+                val list = findViewById<RecyclerView>(R.id.list)
+                // Follow the conversation only when the user is at the top (not reading older lines).
+                if (!list.canScrollVertically(-1)) list.scrollToPosition(0)
             }
+            is LiveBus.Event.Translated -> adapter.upsert(e.record)
         }
     }
 
@@ -142,6 +172,7 @@ class MainActivity : AppCompatActivity() {
             adapter = this@MainActivity.adapter
         }
         modeButtons = mapOf(
+            ListenMode.MIXED_ES to findViewById(R.id.modeMixed),
             ListenMode.AUTO to findViewById(R.id.modeAuto),
             ListenMode.SPANISH to findViewById(R.id.modeEs),
             ListenMode.ENGLISH to findViewById(R.id.modeEn),
@@ -150,6 +181,7 @@ class MainActivity : AppCompatActivity() {
             b.setOnClickListener {
                 prefs.mode = mode
                 showMode()
+                showSpeaker()
                 TranslatorService.settingsChanged(this)
             }
         }
@@ -210,7 +242,11 @@ class MainActivity : AppCompatActivity() {
     private fun showSpeaker() {
         val on = prefs.speakAloud
         speakerButton.isActivated = on
-        speakerButton.text = getString(if (on) R.string.speaker_on else R.string.speaker_off)
+        speakerButton.text = when {
+            prefs.mode == ListenMode.MIXED_ES -> getString(R.string.speaker_group_mode)
+            on -> getString(R.string.speaker_on)
+            else -> getString(R.string.speaker_off)
+        }
     }
 
     private fun showStatus(s: LiveBus.Event.Status) {

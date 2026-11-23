@@ -72,6 +72,10 @@ class CoreLogicTest {
     @Test fun detectsUnfinishedSentences() {
         assertTrue(SentenceText.looksUnfinished("Quiero ir a la tienda y"))
         assertTrue(SentenceText.looksUnfinished("I went to the"))
+        // Real endings are not held (they would be glued to the next speaker's sentence).
+        listOf("Okay then", "I think so", "Me too", "Yes I can", "That's how it was", "Nada más", "Where is it").forEach {
+            assertFalse(it, SentenceText.looksUnfinished(it))
+        }
         assertTrue(SentenceText.looksUnfinished("Necesito que,"))
         assertFalse(SentenceText.looksUnfinished("Quiero ir a la tienda"))
         assertFalse(SentenceText.looksUnfinished("I went home."))
@@ -79,7 +83,13 @@ class CoreLogicTest {
     }
 
     @Test fun joinsFragments() {
-        assertEquals("Quiero ir a la tienda y comprar pan", SentenceText.join("Quiero ir a la tienda y", "Comprar pan"))
+        assertEquals("Quiero ir a la tienda y comprar pan", SentenceText.join("Quiero ir a la tienda y", "comprar pan"))
+        // Names keep their capital letter when a sentence is joined.
+        assertEquals("Mi hijo vive en Los Ángeles", SentenceText.join("Mi hijo vive en", "Los Ángeles"))
+        assertEquals("Good afternoon, Charles", SentenceText.join("Good afternoon,", "Charles"))
+        assertEquals("My son lives in Houston", SentenceText.join("My son lives in", "Houston"))
+        // An ordinary word the recognizer capitalized is still lowercased.
+        assertEquals("Put the gloves in the box", SentenceText.join("Put the", "Gloves in the box"))
         assertEquals("I went to the store", SentenceText.join("I went to the", "store"))
         assertEquals("Tell him and I will go", SentenceText.join("Tell him and", "I will go"))
     }

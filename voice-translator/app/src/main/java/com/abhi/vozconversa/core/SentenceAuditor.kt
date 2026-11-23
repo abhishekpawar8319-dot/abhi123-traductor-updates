@@ -355,7 +355,10 @@ class Corrector(
         } catch (e: Exception) {
             ""
         }
-        val updated = record.copy(original = clean, translated = translated, alternatives = emptyList())
+        val updated = record.copy(
+            original = clean, translated = translated, alternatives = emptyList(),
+            status = if (translated.isBlank()) TStatus.FAILED else TStatus.DONE,
+        )
         store.update(updated)
         return updated
     }

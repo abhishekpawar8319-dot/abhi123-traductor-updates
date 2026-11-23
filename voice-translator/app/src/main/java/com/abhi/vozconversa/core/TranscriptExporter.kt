@@ -21,7 +21,13 @@ object TranscriptExporter {
             sb.append('[').append(time.format(Date(r.timeMillis))).append("] ")
                 .append(r.source.short).append(" → ").append(r.target.short).append('\n')
                 .append("  ").append(r.original).append('\n')
-                .append("  ").append(r.translated.ifBlank { "(not translated)" }).append('\n')
+                .append("  ").append(
+                    when (r.status) {
+                        TStatus.NOT_NEEDED -> "(already English)"
+                        TStatus.PENDING, TStatus.FAILED -> "(translation pending)"
+                        TStatus.DONE -> r.translated.ifBlank { "(not translated)" }
+                    }
+                ).append('\n')
         }
         return sb.toString()
     }

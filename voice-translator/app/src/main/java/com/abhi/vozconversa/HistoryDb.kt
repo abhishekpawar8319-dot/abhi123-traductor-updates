@@ -9,11 +9,12 @@ import com.abhi.vozconversa.core.CorrectionDictionary
 import com.abhi.vozconversa.core.CorrectionStore
 import com.abhi.vozconversa.core.HistoryStore
 import com.abhi.vozconversa.core.Lang
+import com.abhi.vozconversa.core.TStatus
 import com.abhi.vozconversa.core.TranslationRecord
 
 /** Saved translations. Text only (no audio), so it stays small: about 200 bytes per sentence. */
 class HistoryDb(context: Context, name: String? = "history.db") :
-    SQLiteOpenHelper(context.applicationContext, name, null, 2), HistoryStore, CorrectionStore {
+    SQLiteOpenHelper(context.applicationContext, name, null, 3), HistoryStore, CorrectionStore {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -22,11 +23,27 @@ class HistoryDb(context: Context, name: String? = "history.db") :
         )
         db.execSQL("CREATE INDEX idx_ts ON translations(ts)")
         upgradeTo2(db)
+        upgradeTo3(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 2) upgradeTo2(db)
+        if (oldVersion < 3) upgradeTo3(db)
     }
+
+    /** Version 3 (app 1.6): translation status, so sentences are saved first and translated in the background. */
+    private fun upgradeTo3(db: SQLiteDatabase) {
+        db.execSQL("ALTER TABLE translations ADD COLUMN status TEXT NOT NULL DEFAULT 'DONE'")
+        db.execSQL("UPDATE translations SET status = 'FAILED' WHERE translated = ''")
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_status ON translations(status)")
+    }
+
+    override fun pending(): List<TranslationRecord> =
+        read("status IN ('PENDING', 'FAILED')", null, "ts ASC, id ASC", null)
+
+    fun waitingCount(): Long = readableDatabase.rawQuery(
+        "SELECT COUNT(*) FROM translations WHERE status IN ('PENDING', 'FAILED')", null
+    ).use { it.moveToFirst(); it.getLong(0) }
 
     /** Version 2 (app 1.3): recognizer alternatives per sentence, and learned word fixes. Old rows are kept. */
     private fun upgradeTo2(db: SQLiteDatabase) {
@@ -49,6 +66,7 @@ class HistoryDb(context: Context, name: String? = "history.db") :
             put("translated", record.translated)
             put("src", record.source.name)
             put("alts", record.alternatives.joinToString("\n"))
+            put("status", record.status.name)
         }
         writableDatabase.update("translations", v, "id = ?", arrayOf(record.id.toString()))
     }
@@ -84,6 +102,7 @@ class HistoryDb(context: Context, name: String? = "history.db") :
             put("original", record.original)
             put("translated", record.translated)
             put("alts", record.alternatives.joinToString("\n"))
+            put("status", record.status.name)
         }
         return writableDatabase.insertOrThrow("translations", null, v)
     }
@@ -131,6 +150,7 @@ class HistoryDb(context: Context, name: String? = "history.db") :
                     original = c.getString(c.getColumnIndexOrThrow("original")),
                     translated = c.getString(c.getColumnIndexOrThrow("translated")),
                     alternatives = c.getString(c.getColumnIndexOrThrow("alts")).split('\n').filter { it.isNotBlank() },
+                    status = runCatching { TStatus.valueOf(c.getString(c.getColumnIndexOrThrow("status"))) }.getOrDefault(TStatus.DONE),
                 )
             }
             out

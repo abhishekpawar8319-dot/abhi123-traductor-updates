@@ -31,6 +31,7 @@ class SpeakerButtonTest {
     @Test fun tapTurnsSpeakerOffAndOnAndIsRemembered() {
         val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
         Prefs(ctx).speakAloud = true
+        Prefs(ctx).mode = com.abhi.vozconversa.core.ListenMode.AUTO
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         val button = activity.findViewById<Button>(R.id.speaker)
         assertTrue(button.text.contains("Speaker ON"))
@@ -48,6 +49,15 @@ class SpeakerButtonTest {
         // Still on after the app is closed and opened again.
         val again = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         assertTrue(again.findViewById<Button>(R.id.speaker).text.contains("Speaker ON"))
+    }
+
+    @Test fun groupModeIsDefaultAndExplainsTheSpeaker() {
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        assertTrue(activity.findViewById<Button>(R.id.modeMixed).isSelected)   // group mode chosen by default
+        assertTrue(activity.findViewById<Button>(R.id.speaker).text.contains("Group mode"))
+        activity.findViewById<Button>(R.id.modeAuto).performClick()
+        assertFalse(activity.findViewById<Button>(R.id.modeMixed).isSelected)
+        assertTrue(activity.findViewById<Button>(R.id.speaker).text.contains("Speaker"))
     }
 
     @Test fun everySavedTranslationHasAPlayButton() {

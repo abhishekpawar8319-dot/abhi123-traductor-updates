@@ -29,6 +29,17 @@ Modes: **Auto ES⇄EN** detects who is speaking. **Español → EN** and **Engli
 | Saved | Every sentence goes into an on-phone SQLite database straight away, even if translation fails (it is then saved untranslated). |
 | Doesn't disturb the phone | Text only, no audio is stored (about 200 bytes per sentence, under 2 MB for a very busy day). Old entries are removed automatically (1 year by default; 30 days–forever). The notification is low priority, with no sound or vibration. When speaking a translation, the app lowers other audio instead of stopping it and pauses the microphone so it does not translate itself. |
 
+## Group conversations (fast mode)
+**👥 Group: record all, translate Spanish → English** (the default) is made for many people talking, Spanish and English mixed:
+- **Record first, translate in the background.** Each sentence appears and is saved the moment it is heard; a background
+  queue translates it while listening carries on. If the app is closed, waiting sentences are translated when it starts again.
+  Failed translations are retried every minute, never skipped.
+- **English is recorded as said, not translated**, so the queue only has the Spanish to work on.
+- **The microphone never pauses:** on Android 13+ it listens continuously (each sentence arrives while the mic stays on);
+  elsewhere it restarts instantly. If a listening session is cut off, the words already heard are kept.
+- A one-second pause ends a sentence. Sentences are not read aloud in group mode (tap 🔊 on a line to hear one).
+- The notification shows how many sentences are still being translated.
+
 ## Working offline (no internet)
 Set up once while connected: tap **📴 Offline** on the main screen, then **1. Download all** (translation pack and, on
 Android 13+, the Spanish and English speech models), then **2. Phone settings** to check that Spanish and English are
@@ -90,5 +101,11 @@ Needs the Android SDK (`local.properties` → `sdk.dir`). The release is signed 
   no false alarms, one injected mistake caught, and the full offline flow (translated the right way, saved, in order).
   Plus 330 sentences the detector was not tuned on. Latest report: `OFFLINE-1000-REPORT.txt`.
 
-Version 1.5 result: all 241 tests passed on 3 separate full runs; offline check 1000/1000 on every check, 330/330 held-out.
+- **10,000-sentence group conversation** (`Conversation10000Test`): 10,000 different sentences, Spanish and English mixed,
+  fast talking and a 1,000-sentence burst, cut-off sessions, split sentences, repeats, noise, a slow and failing translator,
+  a missing language pack for 10 minutes and an app restart. Run with 10 different random mixes (100,000 checks).
+  Report: `CONVERSATION-10000-REPORT.txt`.
+
+Version 1.6 result: all 249 tests passed on 3 separate full runs; 10 × 10,000 conversation checks with 0 problems;
+offline check 1000/1000 on every check, 330/330 held-out.
 The microphone, Google speech recognition and ML Kit translation only run on a real phone, so they still need a test on a device.

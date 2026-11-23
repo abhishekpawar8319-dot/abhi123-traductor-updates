@@ -129,6 +129,7 @@ class Offline1000Test {
         val store = object : HistoryStore {
             val saved = mutableListOf<TranslationRecord>()
             override fun save(record: TranslationRecord): Long { saved += record; return saved.size.toLong() }
+            override fun update(record: TranslationRecord) { saved[(record.id - 1).toInt()] = record }
         }
         val asked = mutableListOf<Pair<String, Lang>>()
         val translator = object : TextTranslator {

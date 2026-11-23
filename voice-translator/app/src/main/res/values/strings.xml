@@ -4,6 +4,7 @@
     <string name="subtitle">Español ⇄ English · conversation</string>
     <string name="start">Start listening</string>
     <string name="stop">Stop</string>
+    <string name="mode_mixed">👥 Group: record all, translate Spanish → English</string>
     <string name="mode_auto">Auto ES⇄EN</string>
     <string name="mode_es">Español → EN</string>
     <string name="mode_en">English → ES</string>
@@ -63,6 +64,12 @@
     <string name="channel_name">Translator running</string>
     <string name="channel_resume">Resume after restart</string>
     <string name="notif_title">Abhishek · %1$d sentences</string>
+    <string name="notif_title_waiting">Abhishek · %1$d sentences · %2$d translating</string>
+    <string name="translating">⏳ translating…</string>
+    <string name="translate_later">⏳ will translate as soon as the language pack is ready</string>
+    <string name="already_english">EN · already English (not translated)</string>
+    <string name="speaker_group_mode">🔇 Group mode: translations on screen, mic never pauses (tap 🔊 on a line to hear it)</string>
+    <string name="status_listening_group">Listening to everyone… Spanish is translated to English</string>
     <string name="resume_title">Abhishek stopped</string>
     <string name="resume_text">The phone restarted. Tap to keep translating.</string>
     <string name="status_starting">Starting…</string>

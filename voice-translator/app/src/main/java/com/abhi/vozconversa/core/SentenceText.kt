@@ -4,14 +4,15 @@ package com.abhi.vozconversa.core
 object SentenceText {
     private val danglingEs = setOf(
         "y", "o", "pero", "que", "de", "del", "la", "el", "los", "las", "un", "una", "en", "con",
-        "para", "por", "a", "al", "porque", "cuando", "si", "mi", "tu", "su", "muy", "más", "como",
+        "para", "por", "a", "al", "porque", "cuando", "mi", "tu", "su", "muy",
         "sin", "entre", "hasta", "desde", "sobre", "nuestro", "nuestra", "este", "esta",
     )
     private val danglingEn = setOf(
         "and", "or", "but", "that", "the", "a", "an", "of", "to", "in", "on", "with", "for",
-        "because", "when", "if", "my", "your", "his", "her", "our", "their", "is", "are", "very",
-        "so", "at", "from", "about", "into", "than", "then", "was", "were", "will", "would",
-        "can", "could", "should", "this", "these", "those",
+        "because", "if", "my", "your", "our", "their", "very",
+        "at", "from", "into", "than",
+        // Not here on purpose: words that can end a real sentence ("Okay then", "I think so", "Me too",
+        // "Yes I can", "That's how it was", "Nada más", "Creo que sí").
     )
     private val fillers = setOf("mm", "mmm", "hmm", "hm", "eh", "ah", "uh", "um", "em", "ehm", "uhm", "este...")
 
@@ -42,9 +43,18 @@ object SentenceText {
     fun join(first: String, second: String): String {
         val a = first.trim().trimEnd('…').removeSuffix("...").trimEnd()
         val b = second.trim()
-        val bAdjusted = if (b.length > 1 && b[0].isUpperCase() && b[1].isLowerCase() && !b.startsWith("I ")) {
+        val words = b.split(" ")
+        val firstWord = words.first()
+        // The recognizer capitalizes the start of each piece. Lowercase it only for ordinary words:
+        // names keep their capital ("in Houston", "en Los Ángeles", "Good afternoon, Charles").
+        val nextIsCapital = words.getOrNull(1)?.firstOrNull()?.isUpperCase() == true
+        val ordinary = firstWord.lowercase().trim(',', '.', '?', '!') in commonStarts && !nextIsCapital
+        val bAdjusted = if (b.length > 1 && b[0].isUpperCase() && ordinary && firstWord != "I" && !firstWord.startsWith("I'")) {
             b.replaceFirstChar { it.lowercase() }
         } else b
         return normalize("$a $bAdjusted")
     }
+
+    /** Ordinary words that can start the second half of a sentence (lowercased when joined). */
+    private val commonStarts: Set<String> by lazy { danglingEs + danglingEn + LanguageGuesser.commonWords() }
 }

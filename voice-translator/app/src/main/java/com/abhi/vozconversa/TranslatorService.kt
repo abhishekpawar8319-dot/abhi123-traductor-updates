@@ -31,6 +31,7 @@ import android.speech.tts.UtteranceProgressListener
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.abhi.vozconversa.core.CaptureTracker
 import com.abhi.vozconversa.core.ConversationEngine
 import com.abhi.vozconversa.core.Lang
 import com.abhi.vozconversa.core.ListenMode
@@ -130,11 +131,18 @@ class TranslatorService : Service() {
     private var sentences = 0
     private var lastLine = ""
     private var lastPrune = 0L
+    private var lastRetry = 0L
     private var languageErrors = 0
     /** Turned off if this phone's recognizer rejects the Android 14 language-detection options. */
     private var useLanguageDetection = true
 
     private val startRunnable = Runnable { startListening() }
+    /** Keeps every word heard, even when a session is cut short. */
+    private val capture = CaptureTracker { text, alts -> onHeard(text, alts) }
+    /** Continuous (segmented) listening, Android 13+; turned off if this phone's recognizer refuses it. */
+    private var useSegmented = Build.VERSION.SDK_INT >= 33
+    private var segmentedFailures = 0
+    private var sessionHadSpeech = false
     private val offlineCtl = OfflineController(Build.VERSION.SDK_INT)
     private var currentSetup = RecognizerSetup(onDevice = false, preferOffline = false, multiLanguageExtras = true)
     private var recognizerOnDevice = false
@@ -217,7 +225,10 @@ class TranslatorService : Service() {
         engine = ConversationEngine(
             scope, translator, db, sessionId, listener = engineListener,
             auditor = SentenceAuditor(Corrections.dictionary(this)),
+            workContext = Dispatchers.IO, // translation never slows down listening
         )
+        // Sentences recorded earlier but not translated yet (app closed, pack missing): translate them now.
+        scope.launch(Dispatchers.IO) { engine?.resumePending() }
         tts = TextToSpeech(this) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
             tts?.setOnUtteranceProgressListener(ttsListener)
@@ -278,6 +289,7 @@ class TranslatorService : Service() {
             try {
                 translator.prepare()
                 modelsReady = true
+                engine?.retryFailed()
                 status(null)
             } catch (e: Exception) {
                 attempt++
@@ -294,7 +306,7 @@ class TranslatorService : Service() {
         if (!running || paused || speakingCount > 0 || listening) return
         val mode = prefs.mode
         when (mode) {
-            ListenMode.SPANISH -> listeningLang = Lang.ES
+            ListenMode.SPANISH, ListenMode.MIXED_ES -> listeningLang = Lang.ES
             ListenMode.ENGLISH -> listeningLang = Lang.EN
             ListenMode.AUTO -> {
                 // Offline, only languages whose speech pack works can be heard.
@@ -329,7 +341,8 @@ class TranslatorService : Service() {
         detectedLang = null
         lastEventAt = SystemClock.elapsedRealtime()
         try {
-            r.startListening(buildRecognizerIntent(packageName, listeningLang, mode, setup, useLanguageDetection))
+            sessionHadSpeech = false
+            r.startListening(buildRecognizerIntent(packageName, listeningLang, mode, setup, useLanguageDetection, segmented = useSegmented))
             listening = true
         } catch (e: Exception) {
             destroyRecognizer()
@@ -345,17 +358,19 @@ class TranslatorService : Service() {
     private fun cancelRecognizer() {
         listening = false
         runCatching { recognizer?.cancel() }
+        capture.onInterrupted() // keep words already heard
     }
 
     private fun destroyRecognizer() {
         listening = false
+        capture.onInterrupted()
         runCatching { recognizer?.destroy() }
         recognizer = null
     }
 
     private val recognitionListener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) { touch(); status(null) }
-        override fun onBeginningOfSpeech() = touch()
+        override fun onBeginningOfSpeech() { touch(); sessionHadSpeech = true }
         override fun onRmsChanged(rmsdB: Float) = touch()
         override fun onBufferReceived(buffer: ByteArray?) {}
         override fun onEndOfSpeech() = touch()
@@ -364,7 +379,28 @@ class TranslatorService : Service() {
         override fun onPartialResults(partialResults: Bundle?) {
             touch()
             val text = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
-            if (!text.isNullOrBlank()) LiveBus.post(LiveBus.Event.Partial(text))
+            if (!text.isNullOrBlank()) {
+                sessionHadSpeech = true
+                capture.onPartial(text)
+                LiveBus.post(LiveBus.Event.Partial(text))
+            }
+        }
+
+        // Continuous listening (Android 13+): each sentence arrives here while the microphone stays on.
+        override fun onSegmentResults(segmentResults: Bundle) {
+            touch()
+            policy.onSuccess()
+            segmentedFailures = 0
+            offlineCtl.onSuccess(listeningLang)
+            LiveBus.post(LiveBus.Event.Partial(""))
+            capture.onFinal(segmentResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty())
+        }
+
+        override fun onEndOfSegmentedSession() {
+            touch()
+            listening = false
+            capture.onInterrupted()
+            scheduleListen(0) // straight back to listening, no gap
         }
 
         override fun onLanguageDetection(results: Bundle) {
@@ -378,21 +414,23 @@ class TranslatorService : Service() {
             policy.onSuccess()
             offlineCtl.onSuccess(listeningLang)
             val all = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).orEmpty()
-            val text = all.firstOrNull()
             LiveBus.post(LiveBus.Event.Partial(""))
-            if (!text.isNullOrBlank()) {
-                val mode = prefs.mode
-                val source = engine?.onUtterance(text, mode, detectedLang, listeningLang, all.drop(1))
-                // In a two-person conversation the next sentence is most likely the other language.
-                if (mode == ListenMode.AUTO && source != null) listeningLang = source.other
-            }
-            scheduleListen(50)
+            capture.onFinal(all)
+            scheduleListen(0) // restart at once: speech right after a sentence is not lost
         }
 
         override fun onError(error: Int) {
             touch()
             listening = false
+            capture.onInterrupted() // the session stopped early: keep the words it had already heard
             if (!running) return
+            // A recognizer that refuses continuous mode fails at once, before hearing anything.
+            if (useSegmented && !sessionHadSpeech &&
+                error != RestartPolicy.ERROR_NO_MATCH && error != RestartPolicy.ERROR_SPEECH_TIMEOUT &&
+                ++segmentedFailures >= 3
+            ) {
+                useSegmented = false
+            }
             when (offlineCtl.onError(error, listeningLang, currentSetup)) {
                 OfflineController.Reaction.RETRY_OFFLINE_NOW -> {
                     // No internet: switch to offline listening at once instead of waiting.
@@ -453,26 +491,44 @@ class TranslatorService : Service() {
             }
             if (wakeLock?.isHeld != true) acquireWakeLock()
             if (System.currentTimeMillis() - lastPrune > 6 * 3600_000L) prune()
+            // Translations that failed (no pack yet, error) are tried again every minute: none is skipped.
+            if (SystemClock.elapsedRealtime() - lastRetry > 60_000) {
+                lastRetry = SystemClock.elapsedRealtime()
+                scope.launch(Dispatchers.IO) { engine?.retryFailed() }
+            }
             main.postDelayed(this, WATCHDOG_MS)
         }
     }
 
     // ---------------------------------------------------------------- results
 
+    /** A sentence was heard: record it at once (translation follows in the background). */
+    private fun onHeard(text: String, alternatives: List<String>) {
+        val mode = prefs.mode
+        val source = engine?.onUtterance(text, mode, detectedLang, listeningLang, alternatives)
+        // Auto mode, two people: the next sentence is most likely the other language.
+        if (mode == ListenMode.AUTO && source != null) listeningLang = source.other
+    }
+
+    // Called from the background translation thread: hand over to the main thread.
     private val engineListener = object : ConversationEngine.Listener {
-        override fun onTranslated(record: TranslationRecord) = deliver(record)
+        override fun onCaptured(record: TranslationRecord) {
+            sentences++
+            LiveBus.post(LiveBus.Event.Captured(record))
+        }
+        override fun onTranslated(record: TranslationRecord) { main.post { deliver(record) } }
         override fun onError(message: String, record: TranslationRecord) {
-            deliver(record)
-            status(getString(R.string.status_translate_failed))
+            main.post { deliver(record); status(getString(R.string.status_translate_failed)) }
         }
     }
 
     private fun deliver(record: TranslationRecord) {
-        sentences++
         lastLine = record.translated.ifBlank { record.original }
         LiveBus.post(LiveBus.Event.Translated(record))
         updateNotification()
-        if (prefs.speakAloud && record.translated.isNotBlank()) speak(record.translated, record.target, "utt-${record.id}")
+        // Group mode: read on screen, so the microphone never pauses and no one is missed.
+        val group = prefs.mode == ListenMode.MIXED_ES
+        if (!group && prefs.speakAloud && record.translated.isNotBlank()) speak(record.translated, record.target, "utt-${record.id}")
     }
 
     private fun applySpeaker(on: Boolean) {
@@ -563,7 +619,13 @@ class TranslatorService : Service() {
         val s = text ?: when (listeningLang) {
             Lang.ES -> getString(R.string.status_listening_es)
             Lang.EN -> getString(R.string.status_listening_en)
-        }.let { if (prefs.mode == ListenMode.AUTO) getString(R.string.status_listening_auto) else it }
+        }.let {
+            when (prefs.mode) {
+                ListenMode.AUTO -> getString(R.string.status_listening_auto)
+                ListenMode.MIXED_ES -> getString(R.string.status_listening_group)
+                else -> it
+            }
+        }
             .let { if (offlineCtl.offline) it + getString(R.string.status_offline_suffix) else it }
         LiveBus.post(LiveBus.Event.Status(running, s))
     }
@@ -634,7 +696,10 @@ class TranslatorService : Service() {
         )
         return NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(getString(R.string.notif_title, sentences))
+            .setContentTitle(
+                engine?.backlog?.takeIf { it > 0 }?.let { getString(R.string.notif_title_waiting, sentences, it) }
+                    ?: getString(R.string.notif_title, sentences)
+            )
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setOngoing(true)

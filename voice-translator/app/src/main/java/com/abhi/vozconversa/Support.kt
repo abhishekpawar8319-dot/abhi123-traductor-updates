@@ -21,7 +21,7 @@ class Prefs(context: Context) {
     private val p = context.applicationContext.getSharedPreferences("voz", Context.MODE_PRIVATE)
 
     var mode: ListenMode
-        get() = runCatching { ListenMode.valueOf(p.getString("mode", null) ?: "AUTO") }.getOrDefault(ListenMode.AUTO)
+        get() = runCatching { ListenMode.valueOf(p.getString("mode", null) ?: "MIXED_ES") }.getOrDefault(ListenMode.MIXED_ES)
         set(v) = p.edit().putString("mode", v.name).apply()
 
     var speakAloud: Boolean
@@ -45,6 +45,8 @@ object LiveBus {
         data class Partial(val text: String) : Event()
         data class Translated(val record: TranslationRecord) : Event()
         data class Speaker(val on: Boolean) : Event()
+        /** A sentence was heard and saved; the translation follows. */
+        data class Captured(val record: TranslationRecord) : Event()
     }
 
     private val main = Handler(Looper.getMainLooper())

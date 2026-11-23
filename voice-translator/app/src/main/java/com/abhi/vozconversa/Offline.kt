@@ -41,10 +41,12 @@ object Net {
     }
 }
 
-/** The recognizer request for one sentence, online or offline. */
+const val SEGMENTED_SESSION_MS = 10 * 60 * 1000L
+
+/** The recognizer request for one sentence (or one continuous session), online or offline. */
 fun buildRecognizerIntent(
     packageName: String, lang: Lang, mode: ListenMode, setup: RecognizerSetup,
-    useLanguageDetection: Boolean, sdk: Int = Build.VERSION.SDK_INT,
+    useLanguageDetection: Boolean, sdk: Int = Build.VERSION.SDK_INT, segmented: Boolean = false,
 ): Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
     putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
     putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang.locale)
@@ -52,13 +54,19 @@ fun buildRecognizerIntent(
     // Ask for the recognizer's other guesses too: they show which words it was unsure about.
     putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
-    // Wait for a real pause before ending the sentence, so whole sentences are captured.
-    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
-    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1200L)
-    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 2000L)
+    // A one-second pause ends a sentence: fast enough for a group conversation, still whole sentences
+    // (a sentence cut on "and"/"que" is joined back by the engine).
+    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 1000L)
+    putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 800L)
+    if (segmented && sdk >= 33) {
+        // Continuous listening: the microphone stays on and each sentence is delivered as a segment,
+        // so nothing is lost between sentences. The session runs for 10 minutes, then restarts at once.
+        putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS)
+        putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, SEGMENTED_SESSION_MS)
+    }
     // Offline: use the speech pack stored on the phone instead of Google's servers.
     if (setup.preferOffline) putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
-    if (mode == ListenMode.AUTO && setup.multiLanguageExtras) {
+    if ((mode == ListenMode.AUTO || mode == ListenMode.MIXED_ES) && setup.multiLanguageExtras) {
         putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", arrayOf(lang.other.locale))
         if (sdk >= 34 && useLanguageDetection) {
             val both = arrayListOf(Lang.ES.locale, Lang.EN.locale)

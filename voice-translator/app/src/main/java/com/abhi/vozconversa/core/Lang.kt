@@ -20,8 +20,22 @@ enum class Lang(val code: String, val locale: String, val short: String) {
     }
 }
 
-/** AUTO detects who is speaking; the other two lock the direction. */
-enum class ListenMode { AUTO, SPANISH, ENGLISH }
+/**
+ * MIXED_ES: group conversation with Spanish and English mixed; every sentence is recorded, only Spanish
+ * is translated (into English). AUTO translates both ways. SPANISH / ENGLISH lock the direction.
+ */
+enum class ListenMode { MIXED_ES, AUTO, SPANISH, ENGLISH }
+
+/** Where a sentence is in the background translation queue. */
+enum class TStatus {
+    /** Recorded, waiting to be translated. */
+    PENDING,
+    DONE,
+    /** Translation failed; it is retried later, never dropped. */
+    FAILED,
+    /** Already in English in Spanish → English mode: nothing to translate. */
+    NOT_NEEDED,
+}
 
 data class TranslationRecord(
     val id: Long = 0,
@@ -32,6 +46,7 @@ data class TranslationRecord(
     val translated: String,
     /** The recognizer's other guesses for this sentence, used to point at doubtful words. */
     val alternatives: List<String> = emptyList(),
+    val status: TStatus = TStatus.DONE,
 ) {
     val target: Lang get() = source.other
 }

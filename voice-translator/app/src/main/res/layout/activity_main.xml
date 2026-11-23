@@ -16,8 +16,12 @@
     <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_marginTop="8dp" android:gravity="center" android:textColor="@color/muted" android:textSize="14sp" />
 
+    <Button android:id="@+id/modeMixed" android:layout_width="match_parent" android:layout_height="44dp"
+        android:layout_marginTop="10dp" android:layout_marginHorizontal="3dp" android:background="@drawable/chip_bg"
+        android:text="@string/mode_mixed" android:textAllCaps="false" android:textColor="@color/text" android:textSize="14sp" />
+
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" android:orientation="horizontal">
+        android:orientation="horizontal">
         <Button android:id="@+id/modeAuto" style="@style/Chip" android:text="@string/mode_auto" />
         <Button android:id="@+id/modeEs" style="@style/Chip" android:text="@string/mode_es" />
         <Button android:id="@+id/modeEn" style="@style/Chip" android:text="@string/mode_en" />
