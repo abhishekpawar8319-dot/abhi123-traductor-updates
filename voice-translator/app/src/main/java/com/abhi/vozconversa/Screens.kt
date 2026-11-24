@@ -1,0 +1,463 @@
+package com.abhi.vozconversa
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
+import android.text.format.DateUtils
+import android.text.format.Formatter
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.abhi.vozconversa.core.ListenMode
+import com.abhi.vozconversa.core.TranscriptExporter
+import com.abhi.vozconversa.core.TranslationRecord
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.Executors
+
+class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
+    private val items = ArrayList<TranslationRecord>()
+    private val time = SimpleDateFormat("HH:mm", Locale.getDefault())
+    var onLongPress: ((TranslationRecord) -> Unit)? = null
+    var onPlay: ((TranslationRecord) -> Unit)? = null
+    var onFix: ((TranslationRecord) -> Unit)? = null
+    /** Translate this sentence into English or Spanish on request. */
+    var onTranslateTo: ((TranslationRecord, com.abhi.vozconversa.core.Lang) -> Unit)? = null
+    /** Marks doubtful words in each sentence. */
+    var auditor: com.abhi.vozconversa.core.SentenceAuditor? = null
+
+    class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val tag: TextView = v.findViewById(R.id.tag)
+        val original: TextView = v.findViewById(R.id.original)
+        val translated: TextView = v.findViewById(R.id.translated)
+        val play: Button = v.findViewById(R.id.play)
+        val fix: Button = v.findViewById(R.id.fix)
+        val toEn: Button = v.findViewById(R.id.toEn)
+        val toEs: Button = v.findViewById(R.id.toEs)
+    }
+
+    /** Puts a fixed sentence back in place. */
+    fun update(r: TranslationRecord) {
+        val i = items.indexOfFirst { it.id == r.id }
+        if (i >= 0) { items[i] = r; notifyItemChanged(i) }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setAll(list: List<TranslationRecord>) { items.clear(); items.addAll(list); notifyDataSetChanged() }
+
+    /** Newest first; keeps the screen light during long conversations (everything stays saved in History). */
+    fun addTop(r: TranslationRecord) {
+        items.add(0, r)
+        notifyItemInserted(0)
+        if (items.size > MAX_ON_SCREEN) {
+            val extra = items.size - MAX_ON_SCREEN
+            repeat(extra) { items.removeAt(items.size - 1) }
+            notifyItemRangeRemoved(MAX_ON_SCREEN, extra)
+        }
+    }
+
+    /** Puts the finished translation in place, or adds the sentence if it is not on screen yet. */
+    fun upsert(r: TranslationRecord) {
+        val i = items.indexOfFirst { it.id == r.id }
+        if (i >= 0) { items[i] = r; notifyItemChanged(i) } else addTop(r)
+    }
+
+    companion object { const val MAX_ON_SCREEN = 300 }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        VH(LayoutInflater.from(parent.context).inflate(R.layout.item_translation, parent, false))
+
+    override fun getItemCount() = items.size
+
+    override fun onBindViewHolder(h: VH, position: Int) {
+        val r = items[position]
+        val day = if (DateUtils.isToday(r.timeMillis)) "" else DateUtils.formatDateTime(
+            h.itemView.context, r.timeMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH
+        ) + " "
+        h.tag.text = "${r.source.short} → ${r.target.short} · $day${time.format(Date(r.timeMillis))}"
+        val audit = auditor?.audit(r.original, r.source, r.alternatives)
+        h.original.text = if (audit != null) highlightIssues(r.original, audit) else r.original
+        val doubtful = audit != null && audit.issues.isNotEmpty()
+        h.fix.text = if (doubtful) "⚠✏️" else "✏️"
+        h.fix.setOnClickListener { onFix?.invoke(r) }
+        h.original.setOnClickListener { onFix?.invoke(r) }
+        val ctx = h.itemView.context
+        h.translated.text = when (r.status) {
+            com.abhi.vozconversa.core.TStatus.PENDING -> ctx.getString(R.string.translating)
+            com.abhi.vozconversa.core.TStatus.FAILED -> ctx.getString(R.string.translate_later)
+            com.abhi.vozconversa.core.TStatus.NOT_NEEDED -> r.original
+            com.abhi.vozconversa.core.TStatus.DONE -> r.translated.ifBlank { ctx.getString(R.string.not_translated) }
+            com.abhi.vozconversa.core.TStatus.ON_REQUEST -> ctx.getString(R.string.on_request)
+        }
+        // Mixed Spanish/English sentence: say so, it is translated into English.
+        if (com.abhi.vozconversa.core.LanguageGuesser.mix(r.original) == com.abhi.vozconversa.core.Mix.MIXED &&
+            r.status != com.abhi.vozconversa.core.TStatus.NOT_NEEDED
+        ) {
+            h.tag.text = ctx.getString(R.string.mixed_tag) + " → " + r.target.short + " · " + time.format(Date(r.timeMillis))
+        }
+        // Manual translation, any time, either way. The current choice is highlighted.
+        val shownIn = if (r.status == com.abhi.vozconversa.core.TStatus.DONE) r.target else null
+        h.toEn.isSelected = shownIn == com.abhi.vozconversa.core.Lang.EN
+        h.toEs.isSelected = shownIn == com.abhi.vozconversa.core.Lang.ES
+        h.toEn.setOnClickListener { onTranslateTo?.invoke(r, com.abhi.vozconversa.core.Lang.EN) }
+        h.toEs.setOnClickListener { onTranslateTo?.invoke(r, com.abhi.vozconversa.core.Lang.ES) }
+        h.toEn.visibility = if (onTranslateTo == null) View.GONE else View.VISIBLE
+        h.toEs.visibility = h.toEn.visibility
+        h.translated.alpha = if (r.status == com.abhi.vozconversa.core.TStatus.DONE || r.status == com.abhi.vozconversa.core.TStatus.NOT_NEEDED) 1f else 0.6f
+        if (r.status == com.abhi.vozconversa.core.TStatus.NOT_NEEDED) {
+            h.tag.text = ctx.getString(R.string.already_english) + " · " + time.format(Date(r.timeMillis))
+        }
+        h.itemView.setOnLongClickListener { onLongPress?.invoke(r); onLongPress != null }
+        h.play.visibility = if (r.translated.isBlank() || r.status != com.abhi.vozconversa.core.TStatus.DONE) View.INVISIBLE else View.VISIBLE
+        h.play.setOnClickListener { onPlay?.invoke(r) }
+    }
+}
+
+private val io = Executors.newSingleThreadExecutor()
+
+/** Plays one translation: through the service if it is listening (so it pauses the mic), else directly. */
+internal fun playTranslation(activity: AppCompatActivity, speaker: Lazy<Speaker>, r: TranslationRecord) {
+    if (r.translated.isBlank()) return
+    if (TranslatorService.running) TranslatorService.say(activity, r.translated, r.target)
+    else speaker.value.say(r.translated, r.target)
+}
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var prefs: Prefs
+    private lateinit var status: TextView
+    private lateinit var toggle: Button
+    private lateinit var partial: TextView
+    private val adapter = TranslationAdapter()
+    private lateinit var modeButtons: Map<ListenMode, Button>
+    private lateinit var speakerButton: Button
+    private val speaker = lazy { Speaker(this) }
+    private lateinit var fixUi: FixUi
+    private lateinit var offlineUi: OfflineUi
+
+    private val busListener: (LiveBus.Event) -> Unit = { e ->
+        when (e) {
+            is LiveBus.Event.Status -> showStatus(e)
+            is LiveBus.Event.Partial -> partial.text = e.text
+            is LiveBus.Event.Speaker -> showSpeaker()
+            is LiveBus.Event.Captured -> {
+                adapter.upsert(e.record)
+                val list = findViewById<RecyclerView>(R.id.list)
+                // Follow the conversation only when the user is at the top (not reading older lines).
+                if (!list.canScrollVertically(-1)) list.scrollToPosition(0)
+            }
+            is LiveBus.Event.Translated -> adapter.upsert(e.record)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        prefs = Prefs(this)
+        status = findViewById(R.id.status)
+        toggle = findViewById(R.id.toggle)
+        partial = findViewById(R.id.partial)
+        findViewById<RecyclerView>(R.id.list).apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = this@MainActivity.adapter
+        }
+        modeButtons = mapOf(
+            ListenMode.MIXED_ES to findViewById(R.id.modeMixed),
+            ListenMode.AUTO to findViewById(R.id.modeAuto),
+            ListenMode.SPANISH to findViewById(R.id.modeEs),
+            ListenMode.ENGLISH to findViewById(R.id.modeEn),
+        )
+        modeButtons.forEach { (mode, b) ->
+            b.setOnClickListener {
+                prefs.mode = mode
+                showMode()
+                showSpeaker()
+                TranslatorService.settingsChanged(this)
+            }
+        }
+        speakerButton = findViewById(R.id.speaker)
+        speakerButton.setOnClickListener {
+            TranslatorService.setSpeaker(this, !prefs.speakAloud)
+            showSpeaker()
+        }
+        adapter.onPlay = { r -> playTranslation(this, speaker, r) }
+        fixUi = FixUi(this) { r -> adapter.update(r) }
+        adapter.auditor = fixUi.auditor
+        adapter.onFix = { r -> fixUi.open(r) }
+        adapter.onTranslateTo = { r, target -> fixUi.translateTo(r, target) }
+        val autoButton = findViewById<Button>(R.id.autoTranslate)
+        fun showAuto() {
+            autoButton.isActivated = prefs.autoTranslate
+            autoButton.text = getString(if (prefs.autoTranslate) R.string.auto_on else R.string.auto_off)
+        }
+        autoButton.setOnClickListener { prefs.autoTranslate = !prefs.autoTranslate; showAuto() }
+        showAuto()
+        val offlineButton = findViewById<Button>(R.id.offline)
+        offlineUi = OfflineUi(this) { r ->
+            offlineButton.text = getString(if (r.ready) R.string.offline_button_ready else R.string.offline_button_not_ready)
+            offlineButton.isActivated = r.ready
+        }
+        offlineButton.setOnClickListener { offlineUi.show() }
+        showSpeaker()
+        toggle.setOnClickListener {
+            if (TranslatorService.running) TranslatorService.stop(this) else startWithPermissions()
+        }
+        findViewById<Button>(R.id.history).setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
+        findViewById<Button>(R.id.battery).setOnClickListener { askBatteryExemption() }
+        showMode()
+        // Opened from the "resume after restart" notification.
+        if (savedInstanceState == null && intent.getBooleanExtra("autostart", false) && !TranslatorService.running) {
+            startWithPermissions()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        LiveBus.add(busListener)
+        showStatus(LiveBus.lastStatus.copy(running = TranslatorService.running))
+        showSpeaker() // may have been changed from the notification
+        offlineUi.refresh() // packs may have been downloaded in the phone settings meanwhile
+        io.execute {
+            val list = HistoryDb.get(this).recent(100)
+            runOnUiThread { adapter.setAll(list) }
+        }
+        updateBatteryButton()
+    }
+
+    override fun onStop() {
+        LiveBus.remove(busListener)
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        if (speaker.isInitialized()) speaker.value.shutdown()
+        fixUi.close()
+        super.onDestroy()
+    }
+
+    private fun showSpeaker() {
+        val on = prefs.speakAloud
+        speakerButton.isActivated = on
+        speakerButton.text = when {
+            prefs.mode == ListenMode.MIXED_ES -> getString(R.string.speaker_group_mode)
+            on -> getString(R.string.speaker_on)
+            else -> getString(R.string.speaker_off)
+        }
+    }
+
+    private fun showStatus(s: LiveBus.Event.Status) {
+        val on = s.running || TranslatorService.running
+        toggle.text = getString(if (on) R.string.stop else R.string.start)
+        toggle.isActivated = on
+        status.text = s.text.ifBlank { getString(if (on) R.string.status_listening_auto else R.string.status_stopped) }
+        if (!on) partial.text = ""
+    }
+
+    private fun showMode() {
+        modeButtons.forEach { (mode, b) -> b.isSelected = mode == prefs.mode }
+    }
+
+    private fun startWithPermissions() {
+        val needed = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        if (Build.VERSION.SDK_INT >= 33) needed += Manifest.permission.POST_NOTIFICATIONS
+        val missing = needed.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isEmpty()) TranslatorService.start(this)
+        else ActivityCompat.requestPermissions(this, missing.toTypedArray(), 7)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            TranslatorService.start(this)
+            if (!isIgnoringBattery()) askBatteryExemption()
+        } else {
+            Toast.makeText(this, R.string.status_need_mic, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun isIgnoringBattery(): Boolean =
+        (getSystemService(POWER_SERVICE) as PowerManager).isIgnoringBatteryOptimizations(packageName)
+
+    private fun updateBatteryButton() {
+        findViewById<Button>(R.id.battery).visibility = if (isIgnoringBattery()) View.GONE else View.VISIBLE
+    }
+
+    @SuppressLint("BatteryLife")
+    private fun askBatteryExemption() {
+        // Without this, Android may pause the app at night and the 24/7 listening would stop.
+        runCatching {
+            startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName")))
+        }.onFailure {
+            runCatching { startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
+        }
+    }
+}
+
+class HistoryActivity : AppCompatActivity() {
+    private val adapter = TranslationAdapter()
+    private lateinit var db: HistoryDb
+    private lateinit var info: TextView
+    private var query = ""
+    private val speaker = lazy { Speaker(this) }
+    private val retentionChoices = intArrayOf(30, 90, 180, 365, 0)
+    private lateinit var fixUi: FixUi
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_history)
+        fixUi = FixUi(this) { r -> adapter.update(r) }
+        adapter.auditor = fixUi.auditor
+        adapter.onFix = { r -> fixUi.open(r) }
+        adapter.onTranslateTo = { r, target -> fixUi.translateTo(r, target) }
+        findViewById<Button>(R.id.learned).setOnClickListener { fixUi.showLearned() }
+        findViewById<Button>(R.id.translateAll).setOnClickListener { fixUi.translateAllWaiting(com.abhi.vozconversa.core.Lang.EN) }
+        db = HistoryDb.get(this)
+        info = findViewById(R.id.info)
+        findViewById<RecyclerView>(R.id.list).apply {
+            layoutManager = LinearLayoutManager(this@HistoryActivity)
+            adapter = this@HistoryActivity.adapter
+        }
+        adapter.onPlay = { r -> playTranslation(this, speaker, r) }
+        adapter.onLongPress = { r ->
+            AlertDialog.Builder(this).setMessage(R.string.delete_one)
+                .setPositiveButton(R.string.delete) { _, _ -> io.execute { db.delete(r.id); reload() } }
+                .setNegativeButton(android.R.string.cancel, null).show()
+        }
+        findViewById<EditText>(R.id.search).addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+            override fun afterTextChanged(s: Editable?) { query = s?.toString().orEmpty(); reload() }
+        })
+        val prefs = Prefs(this)
+        findViewById<Spinner>(R.id.retention).apply {
+            adapter = ArrayAdapter(
+                this@HistoryActivity, android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.retention_labels)
+            )
+            setSelection(retentionChoices.indexOf(prefs.retentionDays).coerceAtLeast(0))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                    if (prefs.retentionDays == retentionChoices[pos]) return
+                    prefs.retentionDays = retentionChoices[pos]
+                    com.abhi.vozconversa.core.Retention.cutoff(System.currentTimeMillis(), prefs.retentionDays)?.let { c ->
+                        io.execute { db.deleteOlderThan(c); reload() }
+                    }
+                }
+                override fun onNothingSelected(p: AdapterView<*>?) {}
+            }
+        }
+        findViewById<Button>(R.id.exportTxt).setOnClickListener { export(false) }
+        findViewById<Button>(R.id.exportCsv).setOnClickListener { export(true) }
+        findViewById<Button>(R.id.deleteAll).setOnClickListener {
+            AlertDialog.Builder(this).setMessage(R.string.delete_all_confirm)
+                .setPositiveButton(R.string.delete) { _, _ -> io.execute { db.deleteAll(); reload() } }
+                .setNegativeButton(android.R.string.cancel, null).show()
+        }
+        reload()
+    }
+
+    override fun onDestroy() {
+        if (speaker.isInitialized()) speaker.value.shutdown()
+        fixUi.close()
+        super.onDestroy()
+    }
+
+    private fun reload() {
+        val q = query
+        io.execute {
+            val list = db.recent(1000, q)
+            val count = db.count()
+            val size = Formatter.formatShortFileSize(this, db.sizeBytes(this))
+            runOnUiThread {
+                adapter.setAll(list)
+                info.text = getString(R.string.history_info, count, size)
+            }
+        }
+    }
+
+    private fun export(csv: Boolean) {
+        io.execute {
+            val all = db.all()
+            val dir = File(cacheDir, "export").apply { mkdirs(); listFiles()?.forEach { it.delete() } }
+            val stamp = SimpleDateFormat("yyyy-MM-dd_HHmm", Locale.US).format(Date())
+            val file = File(dir, "translations_$stamp." + if (csv) "csv" else "txt")
+            file.writeText(if (csv) TranscriptExporter.toCsv(all) else TranscriptExporter.toText(all))
+            val uri = FileProvider.getUriForFile(this, "$packageName.files", file)
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = if (csv) "text/csv" else "text/plain"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, file.name)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            runOnUiThread { startActivity(Intent.createChooser(send, getString(R.string.export))) }
+        }
+    }
+}
+
+/** After a reboot Android does not let apps turn the microphone on by themselves; show a one-tap reminder. */
+class BootReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED && intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+        if (Prefs(context).wasRunning) showResume(context)
+    }
+
+    companion object {
+    fun showResume(context: Context) {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) return
+        val nm = context.getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            nm.createNotificationChannel(
+                NotificationChannel("voz_resume", context.getString(R.string.channel_resume), NotificationManager.IMPORTANCE_DEFAULT)
+                    .apply { setSound(null, null) }
+            )
+        }
+        val open = PendingIntent.getActivity(
+            context, 0, Intent(context, MainActivity::class.java).putExtra("autostart", true),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        nm.notify(
+            43, NotificationCompat.Builder(context, "voz_resume")
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(context.getString(R.string.resume_title))
+                .setContentText(context.getString(R.string.resume_text))
+                .setSilent(true)
+                .setAutoCancel(true)
+                .setContentIntent(open)
+                .build()
+        )
+    }
+    }
+}

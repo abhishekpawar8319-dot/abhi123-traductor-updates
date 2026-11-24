@@ -1,0 +1,31 @@
+ABHISHEK – 10,000-SENTENCE GROUP CONVERSATION TEST (Group mode: record all, translate Spanish → English)
+Sentences: 10000 different (Spanish 5000, English 5000), mixed at random
+Talking time: 116 min, gaps 0–1.5 s, 1,000 sentences with no gap at all, app restarted at sentence 7,000
+Translator: 150 ms per sentence, 3% random failures, language pack missing for the first 10 minutes
+How sentences arrived: {continuous segment=5574, session cut, words rescued=966, normal result=1910, with noise before=568, rescued + repeated final=506, sentence split by a pause=476}
+
+Saved (none skipped)                 10000 / 10000
+Saved exactly once                   10000 / 10000
+Spanish translated to English        5000 / 5000
+English kept as said (no work)       5000 / 5000  (translator calls for English: 0)
+Saved in the order spoken            yes
+All in the exported file             yes
+Longest wait from speech to saved    0 ms (only sentences cut on 'and'/'que' wait for their end)
+Most sentences waiting for translation at once: 388; queue empty 0s after talking stopped
+Computer time for the whole run      1s (0.17 ms per sentence incl. database)
+
+THE SAME 10,000-SENTENCE CONVERSATION WITH 10 DIFFERENT RANDOM MIXES (speaking order, gaps, failures, cut-offs, splits)
+Mix:  55555  1  22  333  4444  10000  7  99  2026  31415
+Each: 10000/10000 saved once, 5000/5000 Spanish translated, 5000/5000 English kept as said (0 translator calls), in order.
+Total: 100,000 sentence checks, 0 problems.
+
+HOW THE RESULT WAS REACHED
+Run 1: 9,951 / 10,000. Found: sentences ending in words like "then", "so", "más" ("Okay then", "Nada más") were held
+  and glued to the next speaker's sentence; names lost their capital when a sentence paused before them
+  ("lives in houston"). Fixed: only words that can't end a sentence are held; the second piece is kept as heard;
+  two pieces clearly in different languages are kept as two sentences (two people).
+Run 2: 10,000 / 10,000. Then 5 different mixes: mix 55555 found 1 problem: "¿Dónde está el | supervisor?" was split
+  in two because "supervisor" counted as English. Fixed: "supervisor" counts for neither language, and the
+  two-speakers rule needs clear evidence (never a single word).
+Final: 10 mixes × 10,000 = 100,000 checks, 0 problems. Full suite 249 tests passed on 3 runs.
+Not covered here: the real microphone, Google speech recognition and ML Kit translation (they only run on a phone).

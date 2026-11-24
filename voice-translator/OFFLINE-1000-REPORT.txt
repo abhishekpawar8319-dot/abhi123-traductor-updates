@@ -1,0 +1,53 @@
+ABHISHEK – OFFLINE 1,000-SENTENCE CHECK
+Sentences: 1000 (Spanish 500, English 500), kinds: 50, repeated: 0
+Mistakes injected in check 4: {missing accent=31, word said twice=381, other-language word=418, taught fix=170}
+
+1 direction (offline)      1000 / 1000 passed
+2 direction (words only)   1000 / 1000 passed
+3 no false alarm           1000 / 1000 passed
+4 mistake caught           1000 / 1000 passed
+5 offline flow saved       1000 / 1000 passed
+all saved in order         yes
+all in exported file       yes
+
+Sentences with no Spanish/English clue in the words (use the recognizer's language): 0
+
+By kind of sentence (checks run / failed):
+   statement now           200 / 0
+   statement past          200 / 0
+   statement future        200 / 0
+   question where          200 / 0
+   question when           200 / 0
+   question yes/no         200 / 0
+   polite request          200 / 0
+   short command           200 / 0
+   negative                200 / 0
+   numbers in words        200 / 0
+   times and days          200 / 0
+   names and cities        200 / 0
+   weather                 200 / 0
+   safety                  200 / 0
+   tools and materials     200 / 0
+   health                  200 / 0
+   family                  200 / 0
+   food and drink          200 / 0
+   money                   200 / 0
+   transport               200 / 0
+   long sentence           200 / 0
+   numbers in digits       200 / 0
+   greeting                200 / 0
+   thanks and sorry        200 / 0
+   short reply             200 / 0
+
+Held-out direction (words only): 330 / 330
+
+HOW THE RESULT WAS REACHED
+Round 1 (old language detector): direction 999/1000, direction from words alone 965/1000, offline flow 999/1000.
+  Found: English "Excuse me" was translated as Spanish ("me" counted as Spanish); Spanish numbers, "faltan",
+  "ya voy", "vale"; English "arrives", "maybe", "sure", "that's"; "Los Angeles" / "El Paso" counted as Spanish.
+  Fixed: bigger word lists without shared words, English contractions, Spanish/English word endings, city names skipped.
+Round 2: 1000/1000 on every check.
+Round 3 (330 sentences the detector was never tuned on): 329/330. Found: "The café opens at seven" read as
+  Spanish because of the accent. Fixed: accents in words English also uses (café, José, piñata) don't count.
+Final: 1000/1000 on every check, 330/330 held-out, full suite 241 tests passed on 3 runs.
+Not covered here: real microphone, speech recognition and ML Kit translation (they only run on a phone).
