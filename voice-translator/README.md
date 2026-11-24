@@ -40,6 +40,15 @@ Modes: **Auto ES⇄EN** detects who is speaking. **Español → EN** and **Engli
 - A one-second pause ends a sentence. Sentences are not read aloud in group mode (tap 🔊 on a line to hear one).
 - The notification shows how many sentences are still being translated.
 
+## Mixed Spanish and English in one sentence
+- Every sentence is recorded in full, whatever the language.
+- **Auto-translate** (on by default): a sentence with any Spanish in it is translated into English, and English words pass
+  through unchanged ("Pásame the wrench, por favor" → "Pass me the wrench, please"). Mixed speech gets no "maybe misheard"
+  warnings; only a single odd word is marked.
+- **Manual:** every sentence has **→ English** and **→ Español** buttons. Tap either at any time to translate it that way.
+- **Auto-translate OFF** (button on the main screen): record everything, translate only what you tap. In Saved translations,
+  **Translate all untranslated → English** does the rest in one go.
+
 ## Working offline (no internet)
 Set up once while connected: tap **📴 Offline** on the main screen, then **1. Download all** (translation pack and, on
 Android 13+, the Spanish and English speech models), then **2. Phone settings** to check that Spanish and English are
@@ -106,6 +115,10 @@ Needs the Android SDK (`local.properties` → `sdk.dir`). The release is signed 
   a missing language pack for 10 minutes and an app restart. Run with 10 different random mixes (100,000 checks).
   Report: `CONVERSATION-10000-REPORT.txt`.
 
-Version 1.6 result: all 249 tests passed on 3 separate full runs; 10 × 10,000 conversation checks with 0 problems;
-offline check 1000/1000 on every check, 330/330 held-out.
+- **1,000 mixed Spanish/English sentences** (`MixedSpeech1000Test`, made by `tools/make_mixed_sentences.py`): recorded in full,
+  translated into English in Group and Auto mode, no false warnings, background flow, manual → English / → Español,
+  auto-translate off. Report: `MIXED-SPEECH-REPORT.txt`.
+
+Version 1.7 result: all 253 tests passed on 3 separate full runs; mixed check 1000/1000 on all 7 checks; 10,000-sentence
+conversation 10000/10000; offline check 1000/1000 on every check, 330/330 held-out.
 The microphone, Google speech recognition and ML Kit translation only run on a real phone, so they still need a test on a device.

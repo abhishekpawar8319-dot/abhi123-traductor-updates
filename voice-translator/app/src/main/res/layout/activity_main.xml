@@ -37,6 +37,11 @@
         android:textAllCaps="false" android:textColor="@color/text" android:textSize="14sp"
         android:text="@string/offline_button_checking" />
 
+    <Button android:id="@+id/autoTranslate" android:layout_width="match_parent" android:layout_height="44dp"
+        android:layout_marginTop="6dp" android:background="@drawable/speaker_bg"
+        android:textAllCaps="false" android:textColor="@color/text" android:textSize="14sp"
+        android:text="@string/auto_on" />
+
     <TextView android:id="@+id/partial" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:minHeight="24dp" android:textColor="@color/muted" android:textStyle="italic" android:textSize="16sp" />
 

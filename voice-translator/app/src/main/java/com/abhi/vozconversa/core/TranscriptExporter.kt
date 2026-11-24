@@ -25,6 +25,7 @@ object TranscriptExporter {
                     when (r.status) {
                         TStatus.NOT_NEEDED -> "(already English)"
                         TStatus.PENDING, TStatus.FAILED -> "(translation pending)"
+                        TStatus.ON_REQUEST -> "(not translated – auto-translate was off)"
                         TStatus.DONE -> r.translated.ifBlank { "(not translated)" }
                     }
                 ).append('\n')

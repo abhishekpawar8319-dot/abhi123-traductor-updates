@@ -226,6 +226,7 @@ class TranslatorService : Service() {
             scope, translator, db, sessionId, listener = engineListener,
             auditor = SentenceAuditor(Corrections.dictionary(this)),
             workContext = Dispatchers.IO, // translation never slows down listening
+            autoTranslate = { prefs.autoTranslate },
         )
         // Sentences recorded earlier but not translated yet (app closed, pack missing): translate them now.
         scope.launch(Dispatchers.IO) { engine?.resumePending() }
@@ -462,10 +463,12 @@ class TranslatorService : Service() {
                 shutdown()
                 return
             }
-            if (policy.isLanguageProblem(error) && prefs.mode == ListenMode.AUTO) {
+            if (policy.isLanguageProblem(error)) {
+                // Mixed speech or a missing language: drop the auto-detect options right away and keep
+                // listening (Auto mode also tries the other language).
                 languageErrors++
-                if (languageErrors >= 2) useLanguageDetection = false
-                listeningLang = listeningLang.other
+                useLanguageDetection = false
+                if (prefs.mode == ListenMode.AUTO) listeningLang = listeningLang.other
             }
             if (policy.needsRecreate(error)) destroyRecognizer()
             scheduleListen(wait)

@@ -105,6 +105,33 @@ object LanguageGuesser {
         }
     }
 
+    /** How many words of [text] are clues for [lang] (an accented word counts once). */
+    fun wordsIn(text: String, lang: Lang): Int {
+        val original = text.split(Regex("[^\\p{L}\\p{N}'’]+")).filter { it.isNotEmpty() }
+        fun capital(k: Int) = original.getOrNull(k)?.firstOrNull()?.isUpperCase() == true
+        var n = 0
+        for ((i, raw) in original.withIndex()) {
+            val w = raw.lowercase().replace('’', '\'')
+            if (w in nameWords && ((capital(i) && capital(i + 1)) || (i > 1 && capital(i - 1) && capital(i + 1)))) continue
+            val isEn = '\'' in w.trim('\'') || w in english || (w.length >= 5 && w !in spanish && w.endsWith("ing"))
+            val isEs = (w !in loanwords && w.any { it in "ñáéíóúü" }) || w in spanish ||
+                (w.length >= 5 && w !in english && esEndings.any { w.endsWith(it) })
+            if (if (lang == Lang.EN) isEn && !isEs else isEs && !isEn) n++
+        }
+        return n
+    }
+
+    /** Spanish only, English only, or both mixed in one sentence. */
+    fun mix(text: String): Mix {
+        val (es, en) = score(text)
+        return when {
+            es >= 1 && en >= 1 -> Mix.MIXED
+            es >= 1 -> Mix.SPANISH
+            en >= 1 -> Mix.ENGLISH
+            else -> Mix.UNKNOWN
+        }
+    }
+
     /** Everyday words of both languages (not names). */
     fun commonWords(): Set<String> = spanish + english
 
@@ -118,6 +145,9 @@ object LanguageGuesser {
         }
     }
 }
+
+/** How a sentence uses the two languages. */
+enum class Mix { SPANISH, ENGLISH, MIXED, UNKNOWN }
 
 /** Decides which language a finished sentence was spoken in. */
 object DirectionDecider {
@@ -133,6 +163,9 @@ object DirectionDecider {
             val (es, en) = LanguageGuesser.score(text)
             val strongGuess = guess != null && kotlin.math.abs(es - en) >= 2
             when {
+                // Spanish and English mixed in one sentence ("Pásame the wrench, please"): translate it
+                // into English. The Spanish words are translated, the English words pass through unchanged.
+                es >= 1 && en >= 1 -> Lang.ES
                 // Clear text evidence wins over a recognizer detection that disagrees.
                 strongGuess -> guess!!
                 detected != null -> detected

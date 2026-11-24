@@ -22,6 +22,7 @@ class RestartPolicy {
 
         const val STOP = -1L
         const val MAX_BACKOFF = 30_000L
+        const val MAX_SHORT_WAIT = 2_000L
     }
 
     private var failures = 0
@@ -33,7 +34,11 @@ class RestartPolicy {
         // Silence: nobody spoke. Not a failure, listen again at once.
         ERROR_SPEECH_TIMEOUT, ERROR_NO_MATCH -> 100L
         ERROR_INSUFFICIENT_PERMISSIONS -> STOP
-        ERROR_RECOGNIZER_BUSY, ERROR_CLIENT -> { failures++; minOf(MAX_BACKOFF, 300L * failures) }
+        // Language not available / mixed speech confused the recognizer: listen again at once (the service
+        // drops the two-language options). Not a failure; never a long wait.
+        ERROR_LANGUAGE_NOT_SUPPORTED, ERROR_LANGUAGE_UNAVAILABLE -> 150L
+        // Busy recognizer: short waits only, so listening never stalls in a busy conversation.
+        ERROR_RECOGNIZER_BUSY, ERROR_CLIENT -> { failures++; minOf(MAX_SHORT_WAIT, 300L * failures) }
         ERROR_NETWORK, ERROR_NETWORK_TIMEOUT, ERROR_SERVER, ERROR_SERVER_DISCONNECTED,
         ERROR_TOO_MANY_REQUESTS -> {
             failures++

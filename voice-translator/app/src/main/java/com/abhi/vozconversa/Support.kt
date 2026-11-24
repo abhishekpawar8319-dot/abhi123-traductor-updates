@@ -24,6 +24,11 @@ class Prefs(context: Context) {
         get() = runCatching { ListenMode.valueOf(p.getString("mode", null) ?: "MIXED_ES") }.getOrDefault(ListenMode.MIXED_ES)
         set(v) = p.edit().putString("mode", v.name).apply()
 
+    /** Off: record everything, translate only when → English / → Español is tapped. */
+    var autoTranslate: Boolean
+        get() = p.getBoolean("auto", true)
+        set(v) = p.edit().putBoolean("auto", v).apply()
+
     var speakAloud: Boolean
         get() = p.getBoolean("speak", true)
         set(v) = p.edit().putBoolean("speak", v).apply()

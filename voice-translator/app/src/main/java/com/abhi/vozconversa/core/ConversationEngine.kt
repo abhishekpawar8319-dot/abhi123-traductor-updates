@@ -49,6 +49,8 @@ class ConversationEngine(
     private val auditor: SentenceAuditor? = null,
     /** Where translation runs (the service uses a background thread). */
     workContext: CoroutineContext = EmptyCoroutineContext,
+    /** Off = record every sentence, translate only when the user asks. */
+    private val autoTranslate: () -> Boolean = { true },
 ) {
     interface Listener {
         /** A sentence was heard and saved; its translation follows. */
@@ -118,10 +120,16 @@ class ConversationEngine(
     private fun record(p: Pending) {
         val source = DirectionDecider.sourceOf(p.text, p.mode, p.detected, p.listening)
         val text = auditor?.audit(p.text, source, p.alternatives)?.text ?: p.text
-        val needed = !(p.mode == ListenMode.MIXED_ES && source == Lang.EN)
+        val auto = autoTranslate()
+        val needed = auto && !(p.mode == ListenMode.MIXED_ES && source == Lang.EN)
         val rec = TranslationRecord(
             timeMillis = p.time, sessionId = sessionId, source = source, original = text, translated = "",
-            alternatives = p.alternatives, status = if (needed) TStatus.PENDING else TStatus.NOT_NEEDED,
+            alternatives = p.alternatives,
+            status = when {
+                !auto -> TStatus.ON_REQUEST
+                needed -> TStatus.PENDING
+                else -> TStatus.NOT_NEEDED
+            },
         )
         val saved = rec.copy(id = store.save(rec))
         listener.onCaptured(saved)

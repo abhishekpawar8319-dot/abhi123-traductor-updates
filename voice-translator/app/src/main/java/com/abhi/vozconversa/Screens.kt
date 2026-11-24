@@ -51,6 +51,8 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
     var onLongPress: ((TranslationRecord) -> Unit)? = null
     var onPlay: ((TranslationRecord) -> Unit)? = null
     var onFix: ((TranslationRecord) -> Unit)? = null
+    /** Translate this sentence into English or Spanish on request. */
+    var onTranslateTo: ((TranslationRecord, com.abhi.vozconversa.core.Lang) -> Unit)? = null
     /** Marks doubtful words in each sentence. */
     var auditor: com.abhi.vozconversa.core.SentenceAuditor? = null
 
@@ -60,6 +62,8 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
         val translated: TextView = v.findViewById(R.id.translated)
         val play: Button = v.findViewById(R.id.play)
         val fix: Button = v.findViewById(R.id.fix)
+        val toEn: Button = v.findViewById(R.id.toEn)
+        val toEs: Button = v.findViewById(R.id.toEs)
     }
 
     /** Puts a fixed sentence back in place. */
@@ -113,7 +117,22 @@ class TranslationAdapter : RecyclerView.Adapter<TranslationAdapter.VH>() {
             com.abhi.vozconversa.core.TStatus.FAILED -> ctx.getString(R.string.translate_later)
             com.abhi.vozconversa.core.TStatus.NOT_NEEDED -> r.original
             com.abhi.vozconversa.core.TStatus.DONE -> r.translated.ifBlank { ctx.getString(R.string.not_translated) }
+            com.abhi.vozconversa.core.TStatus.ON_REQUEST -> ctx.getString(R.string.on_request)
         }
+        // Mixed Spanish/English sentence: say so, it is translated into English.
+        if (com.abhi.vozconversa.core.LanguageGuesser.mix(r.original) == com.abhi.vozconversa.core.Mix.MIXED &&
+            r.status != com.abhi.vozconversa.core.TStatus.NOT_NEEDED
+        ) {
+            h.tag.text = ctx.getString(R.string.mixed_tag) + " → " + r.target.short + " · " + time.format(Date(r.timeMillis))
+        }
+        // Manual translation, any time, either way. The current choice is highlighted.
+        val shownIn = if (r.status == com.abhi.vozconversa.core.TStatus.DONE) r.target else null
+        h.toEn.isSelected = shownIn == com.abhi.vozconversa.core.Lang.EN
+        h.toEs.isSelected = shownIn == com.abhi.vozconversa.core.Lang.ES
+        h.toEn.setOnClickListener { onTranslateTo?.invoke(r, com.abhi.vozconversa.core.Lang.EN) }
+        h.toEs.setOnClickListener { onTranslateTo?.invoke(r, com.abhi.vozconversa.core.Lang.ES) }
+        h.toEn.visibility = if (onTranslateTo == null) View.GONE else View.VISIBLE
+        h.toEs.visibility = h.toEn.visibility
         h.translated.alpha = if (r.status == com.abhi.vozconversa.core.TStatus.DONE || r.status == com.abhi.vozconversa.core.TStatus.NOT_NEEDED) 1f else 0.6f
         if (r.status == com.abhi.vozconversa.core.TStatus.NOT_NEEDED) {
             h.tag.text = ctx.getString(R.string.already_english) + " · " + time.format(Date(r.timeMillis))
@@ -194,6 +213,14 @@ class MainActivity : AppCompatActivity() {
         fixUi = FixUi(this) { r -> adapter.update(r) }
         adapter.auditor = fixUi.auditor
         adapter.onFix = { r -> fixUi.open(r) }
+        adapter.onTranslateTo = { r, target -> fixUi.translateTo(r, target) }
+        val autoButton = findViewById<Button>(R.id.autoTranslate)
+        fun showAuto() {
+            autoButton.isActivated = prefs.autoTranslate
+            autoButton.text = getString(if (prefs.autoTranslate) R.string.auto_on else R.string.auto_off)
+        }
+        autoButton.setOnClickListener { prefs.autoTranslate = !prefs.autoTranslate; showAuto() }
+        showAuto()
         val offlineButton = findViewById<Button>(R.id.offline)
         offlineUi = OfflineUi(this) { r ->
             offlineButton.text = getString(if (r.ready) R.string.offline_button_ready else R.string.offline_button_not_ready)
@@ -312,7 +339,9 @@ class HistoryActivity : AppCompatActivity() {
         fixUi = FixUi(this) { r -> adapter.update(r) }
         adapter.auditor = fixUi.auditor
         adapter.onFix = { r -> fixUi.open(r) }
+        adapter.onTranslateTo = { r, target -> fixUi.translateTo(r, target) }
         findViewById<Button>(R.id.learned).setOnClickListener { fixUi.showLearned() }
+        findViewById<Button>(R.id.translateAll).setOnClickListener { fixUi.translateAllWaiting(com.abhi.vozconversa.core.Lang.EN) }
         db = HistoryDb.get(this)
         info = findViewById(R.id.info)
         findViewById<RecyclerView>(R.id.list).apply {

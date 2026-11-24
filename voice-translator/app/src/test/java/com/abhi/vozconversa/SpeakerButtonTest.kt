@@ -95,4 +95,35 @@ class SpeakerButtonTest {
         val dialog = org.robolectric.shadows.ShadowDialog.getLatestDialog() as androidx.appcompat.app.AlertDialog
         assertTrue(dialog.isShowing)
     }
+
+    @Test fun autoTranslateSwitchAndManualButtons() {
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        HistoryDb.get(ctx).save(TranslationRecord(0, 3000, 1, Lang.ES, "Pásame the wrench, por favor", "",
+            status = com.abhi.vozconversa.core.TStatus.ON_REQUEST))
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        val auto = activity.findViewById<Button>(R.id.autoTranslate)
+        assertTrue(auto.text.contains("ON"))
+        auto.performClick()
+        assertFalse(Prefs(ctx).autoTranslate)
+        assertTrue(auto.text.contains("OFF"))
+        auto.performClick()
+        assertTrue(Prefs(ctx).autoTranslate)
+
+        Thread.sleep(300)
+        shadowOf(Looper.getMainLooper()).idle()
+        val list = activity.findViewById<RecyclerView>(R.id.list)
+        list.measure(0, 0); list.layout(0, 0, 1080, 2000)
+        val row = list.getChildAt(0)
+        assertTrue(row.findViewById<android.widget.TextView>(R.id.translated).text.contains("Tap → English"))
+        assertTrue(row.findViewById<android.widget.TextView>(R.id.tag).text.contains("ES+EN mixed"))
+        val toEn = row.findViewById<Button>(R.id.toEn)
+        val toEs = row.findViewById<Button>(R.id.toEs)
+        assertEquals(android.view.View.VISIBLE, toEn.visibility)
+        assertEquals(android.view.View.VISIBLE, toEs.visibility)
+        toEn.performClick()                                            // starts a background translation
+        shadowOf(Looper.getMainLooper()).idle()
+        list.measure(0, 0); list.layout(0, 0, 1080, 2000)
+        val shown = (list.getChildAt(0).findViewById<android.widget.TextView>(R.id.translated)).text.toString()
+        assertTrue(shown, shown.contains("translating") || shown.contains("ready"))
+    }
 }

@@ -272,6 +272,38 @@ class FixUi(private val activity: AppCompatActivity, private val onUpdated: (Tra
             .setNegativeButton(R.string.close, null).show()
     }
 
+    /** → English / → Español: translate one recorded sentence now, in the background. */
+    fun translateTo(record: TranslationRecord, target: com.abhi.vozconversa.core.Lang) {
+        onUpdated(record.copy(status = com.abhi.vozconversa.core.TStatus.PENDING)) // shows "translating…" at once
+        scope.launch {
+            val updated = withContext(Dispatchers.IO) { corrector.translateTo(record, target) }
+            onUpdated(updated)
+            if (updated.translated.isBlank()) {
+                Toast.makeText(activity, R.string.fix_saved_untranslated, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    /** Translates every sentence that has no translation yet (recorded with auto-translate off, or failed). */
+    fun translateAllWaiting(target: com.abhi.vozconversa.core.Lang) {
+        scope.launch {
+            val db = HistoryDb.get(activity)
+            val waiting = withContext(Dispatchers.IO) {
+                db.all().filter {
+                    it.status == com.abhi.vozconversa.core.TStatus.ON_REQUEST || it.status == com.abhi.vozconversa.core.TStatus.FAILED
+                }
+            }
+            if (waiting.isEmpty()) {
+                Toast.makeText(activity, R.string.translate_all_none, Toast.LENGTH_SHORT).show(); return@launch
+            }
+            Toast.makeText(activity, activity.getString(R.string.translate_all_started, waiting.size), Toast.LENGTH_SHORT).show()
+            for (r in waiting) {
+                val updated = withContext(Dispatchers.IO) { corrector.translateTo(r, target) }
+                onUpdated(updated)
+            }
+        }
+    }
+
     fun close() {
         scope.cancel()
         if (translator.isInitialized()) translator.value.close()

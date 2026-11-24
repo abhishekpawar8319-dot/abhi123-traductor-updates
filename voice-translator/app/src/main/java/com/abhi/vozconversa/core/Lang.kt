@@ -35,6 +35,8 @@ enum class TStatus {
     FAILED,
     /** Already in English in Spanish → English mode: nothing to translate. */
     NOT_NEEDED,
+    /** Auto-translate is off: recorded in full, translated only when the user taps → English / → Español. */
+    ON_REQUEST,
 }
 
 data class TranslationRecord(

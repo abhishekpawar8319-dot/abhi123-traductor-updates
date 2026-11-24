@@ -199,9 +199,12 @@ class SentenceAuditor(private val dictionary: CorrectionDictionary = CorrectionD
             }
         }
 
-        // 2. A word from the other language in the middle of the sentence.
+        // 2. A single word from the other language: probably misheard. But when the sentence really mixes
+        //    both languages (2 or more words of the other one), people are speaking that way: no warnings.
         fun capital(k: Int) = words.getOrNull(k)?.firstOrNull()?.isUpperCase() == true
+        val reallyMixed = LanguageGuesser.wordsIn(fixed, source.other) >= 2
         for (i in words.indices) {
+            if (reallyMixed) break
             val w = lower[i]
             // Part of a name such as "Los Angeles", "El Paso" or "Rio de Janeiro": not a misheard word.
             // (The first word of a sentence is capitalized anyway, so it only counts as a name when it starts one.)
@@ -344,6 +347,27 @@ class Corrector(
         require(wordIndex in words.indices)
         if (learn && replacement.isNotBlank()) dictionary.learn(record.source, words[wordIndex], replacement)
         return rewrite(record, SentenceWords.replace(record.original, wordIndex, replacement))
+    }
+
+    /**
+     * Translates a recorded sentence into [target] on request (→ English / → Español), whatever the automatic
+     * choice was. Works for mixed sentences too: the words already in [target] pass through unchanged.
+     */
+    suspend fun translateTo(record: TranslationRecord, target: Lang): TranslationRecord {
+        val source = target.other
+        val translated = try {
+            translator.translate(record.original, source).trim()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ""
+        }
+        val updated = record.copy(
+            source = source, translated = translated,
+            status = if (translated.isBlank()) TStatus.FAILED else TStatus.DONE,
+        )
+        store.update(updated)
+        return updated
     }
 
     suspend fun rewrite(record: TranslationRecord, newText: String): TranslationRecord {
